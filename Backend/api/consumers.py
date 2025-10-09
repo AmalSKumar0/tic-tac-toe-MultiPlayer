@@ -5,7 +5,15 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Friendship, Presence  # Remove 'User' from this import
 import uuid
+import json
 User = get_user_model()
+import json
+import logging
+from html import escape
+from .models import ChatMessage 
+
+logger = logging.getLogger(__name__)
+
 
 class PresenceConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -176,95 +184,189 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'username': username
         }))
 
-# ... (keep PresenceConsumer and ChatConsumer) ...
 
 class GameConsumer(AsyncWebsocketConsumer):
+    game_rooms = {}
+
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
             await self.close()
             return
         
-        # Get game_id from the URL
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
 
-        # Join the game room
-        await self.channel_layer.group_add(
-            self.game_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_add(self.game_group_name, self.channel_name)
         await self.accept()
 
-    async def disconnect(self, close_code):
-        # Leave the game room
-        await self.channel_layer.group_discard(
-            self.game_group_name,
-            self.channel_name
-        )
+        # --- Player Assignment Logic ---
+        if self.game_id not in self.game_rooms:
+            self.game_rooms[self.game_id] = []
+        
+        players = self.game_rooms[self.game_id]
+        player_role = 'X' if not players else 'O'
+        
+        if len(players) < 2 and self.user.username not in [p['name'] for p in players]:
+            players.append({'name': self.user.username, 'channel': self.channel_name})
+            await self.send(text_data=json.dumps({
+                'type': 'player_assignment',
+                'player': player_role,
+            }))
 
+    # In GameConsumer.disconnect
+
+    async def disconnect(self, close_code):
+        if self.game_id in self.game_rooms:
+            # Find and remove the player who is disconnecting
+            players = self.game_rooms[self.game_id]
+            
+            # Create a new list excluding the disconnected player
+            updated_players = [p for p in players if p['channel'] != self.channel_name]
+
+            if not updated_players:
+                # If the room is now empty, remove it
+                self.game_rooms.pop(self.game_id, None)
+            else:
+                # Otherwise, just update the player list
+                self.game_rooms[self.game_id] = updated_players
+
+        await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
+    
     async def receive(self, text_data):
-        # This is where you'll handle game moves later
-        # For now, we'll just broadcast any message received
+        data = json.loads(text_data)
+        
+        # Broadcast the move to the other player in the group
         await self.channel_layer.group_send(
             self.game_group_name,
             {
-                'type': 'game.message',
-                'message': text_data,
-                'sender': self.user.username
+                'type': 'game.move',
+                'board': data.get('board'),
+                'sender_channel_name': self.channel_name
             }
         )
 
-    async def game_message(self, event):
-        # Send the received message back to the client
-        await self.send(text_data=event['message'])
+    async def game_move(self, event):
+        # Send message to the other player (not the sender)
+        if self.channel_name != event['sender_channel_name']:
+            await self.send(text_data=json.dumps({
+                'type': 'game_move',
+                'board': event['board']
+            }))
+
 
 class GameChatConsumer(AsyncWebsocketConsumer):
+    """
+    A robust, production-ready consumer for handling real-time chat
+    within a specific game instance.
+    """
     async def connect(self):
         self.user = self.scope["user"]
-        if self.user.is_anonymous:
-                    await self.close()
-                    return
 
-                # Get game_id from the URL
-        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        # Authentication Check
+        if self.user.is_anonymous:
+            logger.warning("Anonymous user attempted to connect to game-chat. Rejected.")
+            await self.close()
+            return
+
+        # Get game_id from the URL and validate it's present
+        self.game_id = self.scope['url_route']['kwargs'].get('game_id')
+        if not self.game_id:
+            logger.error("Game chat connection attempt with no game_id. Rejected.")
+            await self.close()
+            return
+
         self.chat_group_name = f'gamechat_{self.game_id}'
 
-                # Join the game chat room
+        # Join the game chat room
         await self.channel_layer.group_add(
-                    self.chat_group_name,
-                    self.channel_name
-                )
+            self.chat_group_name,
+            self.channel_name
+        )
+
         await self.accept()
+        logger.info(f"User '{self.user.username}' connected to game-chat for game '{self.game_id}'.")
 
-        async def disconnect(self, close_code):
-                # Leave the game chat room
-                await self.channel_layer.group_discard(
-                    self.chat_group_name,
-                    self.channel_name
-                )
+    async def disconnect(self, close_code):
+        # Leave the game chat room
+        if hasattr(self, 'chat_group_name'):
+            await self.channel_layer.group_discard(
+                self.chat_group_name,
+                self.channel_name
+            )
+        logger.info(f"User '{self.user.username}' disconnected from game-chat '{self.game_id}'. Code: {close_code}")
 
-        async def receive(self, text_data):
-                """
-                Receive a chat message from the WebSocket and broadcast it to the game chat group.
-                """
-                text_data_json = json.loads(text_data)
-                message = text_data_json.get('message', '')
+    async def receive(self, text_data):
+        """
+        Receives a chat message, validates it, saves it to the database,
+        and then broadcasts it to the game chat group.
+        """
+        # 1. Validate incoming data structure
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError:
+            await self._send_error("Invalid JSON format.")
+            return
 
-                await self.channel_layer.group_send(
-                    self.chat_group_name,
-                    {
-                        'type': 'gamechat.message',
-                        'message': message,
-                        'username': self.user.username
-                    }
-                )
+        # 2. Validate message content
+        message_text = data.get('message', '').strip()
+        if not message_text:
+            await self._send_error("Message cannot be empty.")
+            return
 
-        async def gamechat_message(self, event):
-                """
-                Handler for messages sent to the game chat group.
-                """
-                await self.send(text_data=json.dumps({
-                    'message': event['message'],
-                    'username': event['username']
-                }))
+        # 3. Security: Sanitize input to prevent XSS attacks
+        sanitized_message = escape(message_text)
+
+        # 4. Save the message to the database (asynchronously)
+        try:
+            chat_message = await self._save_message(sanitized_message)
+        except Exception as e:
+            logger.error(f"Error saving game-chat message for user {self.user.username}: {e}")
+            await self._send_error("An internal error occurred while saving your message.")
+            return
+
+        # 5. Broadcast the message to the group
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'gamechat.message',
+                'payload': {
+                    'id': chat_message.id,
+                    'username': self.user.username,
+                    'message': chat_message.content,
+                    'timestamp': chat_message.timestamp.isoformat(),
+                }
+            }
+        )
+
+    async def gamechat_message(self, event):
+        """
+        Handler for messages sent to the game chat group.
+        Sends the structured payload to the client.
+        """
+        await self.send(text_data=json.dumps({
+            'type': 'game_chat_message',
+            'payload': event['payload']
+        }))
+
+    # --- Helper Methods ---
+
+    @database_sync_to_async
+    def _save_message(self, message_content: str):
+        """
+        Saves a chat message to the database, associating it with this game.
+        """
+        return ChatMessage.objects.create(
+            author=self.user,
+            content=message_content,
+            game_id=self.game_id  # Associate message with the game
+        )
+
+    async def _send_error(self, message: str):
+        """
+        Sends a formatted error message to the client.
+        """
+        await self.send(text_data=json.dumps({
+            'type': 'error',
+            'payload': { 'message': message }
+        }))

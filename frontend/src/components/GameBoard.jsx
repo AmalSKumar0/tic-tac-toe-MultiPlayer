@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Cell from './Cells';
-import './tictactoe.css'; // We'll create this CSS file next
+import '../assets/tictactoe.css'; // We'll create this CSS file next
 
 function GameBoard() {
   const [board, setBoard] = useState(Array(9).fill(null));

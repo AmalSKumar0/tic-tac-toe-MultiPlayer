@@ -1,42 +1,54 @@
-// src/components/GameChat.jsx
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // 1. Import jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
 function GameChat() {
   const { gameId } = useParams();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [currentUser, setCurrentUser] = useState(''); // 2. State for the current user
-  const gameSocket = useRef(null);
+  const [currentUser, setCurrentUser] = useState('');
+  const chatSocket = useRef(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token || !gameId) return;
 
-    // 3. Decode the token to get the current user's username
     const decodedToken = jwtDecode(token);
-    setCurrentUser(decodedToken.username); // Adjust if your payload key is different
+    setCurrentUser(decodedToken.username);
 
-    gameSocket.current = new WebSocket(
-      `ws://127.0.0.1:8000/ws/game/${gameId}/?token=${token}`
+    // Using a more descriptive name for the WebSocket ref
+    chatSocket.current = new WebSocket(
+      `ws://127.0.0.1:8000/ws/gameChat/${gameId}/?token=${token}`
     );
 
-    gameSocket.current.onopen = () => console.log(`Chat socket for game ${gameId} connected!`);
-    gameSocket.current.onclose = () => console.log("Chat socket disconnected.");
+    chatSocket.current.onopen = () => console.log(`Chat socket for game ${gameId} connected!`);
+    chatSocket.current.onclose = () => console.log("Chat socket disconnected.");
 
-    gameSocket.current.onmessage = (event) => {
+    chatSocket.current.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setMessages(prevMessages => [...prevMessages, {
-          sender: data.sender,
-          message: data.message,
-      }]);
+      console.log("RAW MESSAGE FROM SERVER during chat:", data);
+
+      // --- MAJOR CHANGE HERE ---
+      // Check the message type before processing
+      if (data.type === 'game_chat_message') {
+        const messagePayload = data.payload;
+
+        // Update the messages state using the new payload structure
+        setMessages(prevMessages => [...prevMessages, {
+          id: messagePayload.id, // Use the unique ID for the key
+          sender: messagePayload.username,
+          message: messagePayload.message,
+        }]);
+
+      } else if (data.type === 'error') {
+        // Now you can also handle errors sent from the server
+        console.error("Server Error:", data.payload.message);
+      }
     };
 
     return () => {
-      if (gameSocket.current) gameSocket.current.close();
+      if (chatSocket.current) chatSocket.current.close();
     };
   }, [gameId]);
 
@@ -46,8 +58,10 @@ function GameChat() {
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (newMessage.trim() && gameSocket.current?.readyState === WebSocket.OPEN) {
-      gameSocket.current.send(JSON.stringify({ 'message': newMessage }));
+    if (newMessage.trim() && chatSocket.current?.readyState === WebSocket.OPEN) {
+      // The message format sent to the server remains simple
+      chatSocket.current.send(JSON.stringify({ 'message': newMessage }));
+      console.log("Sent message:", newMessage, JSON.stringify({ 'message': newMessage }));
       setNewMessage('');
     }
   };
@@ -56,11 +70,11 @@ function GameChat() {
     <div className="chat-box">
       <h3>Game Chat</h3>
       <div className="messages-container">
-        {/* 4. Dynamically assign CSS classes */}
-        {messages.map((msg, index) => {
+        {messages.map((msg) => {
           const messageClass = msg.sender === currentUser ? 'message-sent' : 'message-received';
           return (
-            <div key={index} className={`message-wrapper ${messageClass}`}>
+            // --- Use the unique message ID as the key ---
+            <div key={msg.id} className={`message-wrapper ${messageClass}`}>
               <div className="message-bubble">
                 <strong>{msg.sender}:</strong> {msg.message}
               </div>
@@ -84,3 +98,4 @@ function GameChat() {
 }
 
 export default GameChat;
+

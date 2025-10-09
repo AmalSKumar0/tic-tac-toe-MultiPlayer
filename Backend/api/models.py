@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 
 class FriendRequest(models.Model):
     STATUS_CHOICES = [
@@ -53,3 +56,20 @@ class GameRecord(models.Model):
 
     def __str__(self):
         return f"Game {self.id}: {self.player_x} vs {self.player_o} - Winner: {self.winner if self.winner else 'Draw'}"
+
+
+class ChatMessage(models.Model):
+    author = models.ForeignKey(
+        User,
+        related_name='chat_messages',
+        on_delete=models.CASCADE
+    )
+    game_id = models.CharField(max_length=255, null=True, blank=True, db_index=True) 
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.author.username}: {self.content[:25]}...'
+
+    class Meta:
+        ordering = ['timestamp']
