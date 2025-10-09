@@ -298,60 +298,102 @@
         <div class="float-icon cell-o"></div>
         <div class="float-icon cell-x"></div>
         <div class="float-icon cell-o"></div>
+        <div class="float-icon cell-x"></div>
+        <div class="float-icon cell-o"></div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const icons = document.querySelectorAll('.float-icon');
-            const iconData = [];
+  document.addEventListener('DOMContentLoaded', () => {
+    const socket = new WebSocket("ws://localhost:8000/ws/presence/");
 
-            // 1. Initialize properties for each icon
-            icons.forEach(icon => {
-                const iconSize = icon.getBoundingClientRect().width;
-                iconData.push({
-                    element: icon,
-                    // Start at a random position
-                    x: Math.random() * (window.innerWidth - iconSize),
-                    y: Math.random() * (window.innerHeight - iconSize),
-                    // Set a random velocity (speed and direction)
-                    dx: (Math.random() - 0.5) * 2, // Range: -1 to 1
-                    dy: (Math.random() - 0.5) * 2, // Range: -1 to 1
-                    rotation: Math.random() * 360,
-                    dRotation: (Math.random() - 0.5) * 0.5 // Slower rotation
-                });
-            });
+socket.onopen = () => {
+  console.log("Connected");
+  socket.send(JSON.stringify({status: "online"}));
+};
 
-            // 2. Create the animation loop
-            function animate() {
-                iconData.forEach(data => {
-                    const { element, x, y, dx, dy, rotation, dRotation } = data;
-                    const iconSize = element.getBoundingClientRect().width;
+socket.onmessage = (event) => {
+  console.log("Status update:", event.data);
+};
 
-                    // Update position
-                    data.x += dx;
-                    data.y += dy;
-                    data.rotation += dRotation;
+window.onbeforeunload = () => {
+  socket.send(JSON.stringify({status: "offline"}));
+};
 
-                    // Boundary detection (bouncing off walls)
-                    if (data.x <= 0 || data.x >= window.innerWidth - iconSize) {
-                        data.dx *= -1; // Reverse horizontal direction
-                    }
-                    if (data.y <= 0 || data.y >= window.innerHeight - iconSize) {
-                        data.dy *= -1; // Reverse vertical direction
-                    }
+    const icons = document.querySelectorAll('.float-icon');
+    const iconData = [];
 
-                    // Apply the new position and rotation to the element
-                    element.style.transform = `translate(${data.x}px, ${data.y}px) rotate(${data.rotation}deg)`;
-                });
+    // Initialize properties for each icon
+    icons.forEach(icon => {
+      const iconSize = icon.getBoundingClientRect().width;
+      iconData.push({
+        element: icon,
+        x: Math.random() * (window.innerWidth - iconSize),
+        y: Math.random() * (window.innerHeight - iconSize),
+        dx: (Math.random() - 0.5) * 2,
+        dy: (Math.random() - 0.5) * 2,
+        rotation: Math.random() * 360,
+        dRotation: (Math.random() - 0.5) * 0.5,
+        canToggle: true  // Add toggle flag here
+      });
+    });
 
-                // Request the next frame to continue the animation
-                requestAnimationFrame(animate);
-            }
+    function switchIcon(icon) {
+      if (icon.classList.contains('cell-x')) {
+        icon.classList.remove('cell-x');
+        icon.classList.add('cell-o');
+      } else {
+        icon.classList.remove('cell-o');
+        icon.classList.add('cell-x');
+      }
+    }
 
-            // 3. Start the animation
-            animate();
-        });
-    </script>
+    function handleBounce(data) {
+      if (data.canToggle) {
+        data.canToggle = false;
+        switchIcon(data.element);
+        setTimeout(() => {
+          data.canToggle = true; // reset flag after toggle
+        }, 3000);
+      }
+    }
+
+    function animate() {
+      iconData.forEach(data => {
+        const { element } = data;
+        const iconSize = element.getBoundingClientRect().width;
+
+        // Update position and rotation
+        data.x += data.dx;
+        data.y += data.dy;
+        data.rotation += data.dRotation;
+
+        // Boundary detection and bounce
+        if (data.x <= 0 || data.x >= window.innerWidth - iconSize) {
+          data.dx *= -1;
+          handleBounce(data);
+        }
+        if (data.y <= 0 || data.y >= window.innerHeight - iconSize) {
+          data.dy *= -1;
+          handleBounce(data);
+        }
+
+        // Apply transform
+        element.style.transform = `translate(${data.x}px, ${data.y}px) rotate(${data.rotation}deg)`;
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    // Add click toggle for all icons
+    icons.forEach(icon => {
+      icon.addEventListener('click', () => {
+        switchIcon(icon);
+      });
+    });
+
+    animate();
+  });
+</script>
 
 </body>
 </html>
