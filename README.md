@@ -88,87 +88,100 @@ Follow these steps to run the project locally.
 Follow these steps to run both **backend (Django)** and **frontend (React)** parts of the project smoothly.
 
 ---
+## ⚙️ Project Setup Guide
 
-#### 🐍 Backend Setup
+Easily set up and run both the **Django backend** 🐍 and **React frontend** ⚛️ for your Real-Time Tic-Tac-Toe project.
 
-💡 **Tip:** Make sure **Redis** (for real-time messaging) and **PostgreSQL** (optional for local dev) are running before you start the backend server.
+---
+
+### 🐍 Backend Setup
+
+💡 **Tip:** Ensure **Redis** (for real-time messaging) and **PostgreSQL** (optional for local development) are running before you start the backend server.
 
 ```bash
 # 🌀 Clone the repository
 git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
 cd YOUR_REPO_NAME/backend
 ```
-# 🧱 Create and activate a virtual environment
+
 ```bash
+# 🧱 Create and activate a virtual environment
 python -m venv venv
 ```
+
+```bash
 # ▶️ Activate the environment
 # On Windows:
-```bash
 venv\Scripts\activate
-```
+
 # On macOS/Linux:
-```bash
 source venv/bin/activate
 ```
-# ⚙️ Install dependencies
+
 ```bash
+# ⚙️ Install dependencies
 pip install -r requirements.txt
 ```
-# 🔑 Configure environment variables
+
 ```bash
+# 🔑 Configure environment variables
 cp .env.example .env
 ```
-# 👉 Edit the .env file and add your:
-#    - SECRET_KEY
-#    - Database credentials (if using PostgreSQL)
 
-# 🗃️ Run database migrations
+👉 Edit the `.env` file and add your:
+- `SECRET_KEY`
+- Database credentials *(if using PostgreSQL)*
+
 ```bash
+# 🗃️ Run database migrations
 python manage.py migrate
 ```
-# 🚀 Start the Django development server
+
 ```bash
+# 🚀 Start the Django development server
 python manage.py runserver
 # 🌐 Server running at: http://127.0.0.1:8000
 ```
-### ⚛️ Frontend Setup Guide
-
-Follow these steps to set up and run the **React frontend** of your Real-Time Tic-Tac-Toe project.
 
 ---
 
-💡 **Tip:** Make sure your **Django backend** is already running before starting the frontend for seamless API and WebSocket communication.
+### ⚛️ Frontend Setup
 
-# 📂 Navigate to the frontend directory
+Follow these steps to set up and run the **React frontend** of your Real-Time Tic-Tac-Toe project.
+
+💡 **Note:** Make sure your **Django backend** is already running before starting the frontend for seamless API and WebSocket communication.
+
 ```bash
+# 📂 Navigate to the frontend directory
 cd frontend
 ```
-# 📦 Install all required dependencies
+
 ```bash
+# 📦 Install all required dependencies
 npm install
 ```
+
+```bash
 # ⚙️ (Optional) Configure environment variables
 # If your app uses an environment file for API URLs or WebSocket endpoints:
-```bash
 cp .env.example .env
 ```
-# Then edit .env to include your backend API and WebSocket URLs
 
-# 🚀 Start the React development server
+👉 Then edit `.env` to include your backend API and WebSocket URLs.
+
 ```bash
+# 🚀 Start the React development server
 npm run dev
 ```
-# 🌐 Your frontend is now running at:
+
 ```bash
+# 🌐 Your frontend is now running at:
 # http://localhost:5173
 ```
 
 ---
 
-✅ **Success!**
-Your **React frontend** is up and running 🎉  
-Now open your browser, connect it to the backend, and enjoy real-time gameplay and chat!
-
+✅ **Setup Complete!**  
+Your **full-stack real-time Tic-Tac-Toe app** is now live — open both servers and start playing 🎮🔥
 
 
