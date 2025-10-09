@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project README: Real-Time Tic-Tac-Toe with Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals -->
+    <!-- Application Structure Plan: The application is structured as a single-page vertical layout with a sticky top navigation bar for quick, non-linear access to key sections (Overview, Tech Stack, Architecture, Setup, Roadmap). This design is tailored for a developer audience, allowing them to jump directly to the information they need most, such as setup instructions or architecture diagrams. The structure prioritizes user task-efficiency over mirroring the original report's linear format. Interactive elements like clickable cards, a dynamic architecture diagram, and a tabbed setup guide with copy-to-clipboard functionality are used to enhance engagement and usability, transforming passive reading into active exploration. -->
+    <!-- Visualization & Content Choices: 
+        - Project Overview -> Goal: Inform -> Method: Intro text + Interactive Feature Cards (HTML/CSS) -> Interaction: Hover to scale/highlight -> Justification: More engaging than a static list, quickly showcases project scope.
+        - Tech Stack -> Goal: Organize/Inform -> Method: Clickable Tech Badges + Doughnut Chart (Chart.js) -> Interaction: Click badge for description modal, click chart for details -> Justification: Provides layered information on demand without cluttering the UI and gives a high-level visual summary.
+        - Architecture -> Goal: Explain Relationships -> Method: Dynamic Diagram (HTML/Tailwind) -> Interaction: Hover over components to highlight connections and show info tooltips -> Justification: Makes the abstract data flow tangible and easier to understand than a static text diagram.
+        - Setup Guide -> Goal: Guide Process -> Method: Tabbed Interface with Code Blocks (JS) -> Interaction: Click tabs to switch contexts (Backend/Frontend), click button to copy code -> Justification: Improves usability and reduces friction for developers wanting to run the project.
+        - Roadmap -> Goal: Inform -> Method: Styled List (HTML/CSS) -> Interaction: None -> Justification: Clearly presents future plans in a simple, readable format.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        :root {
+            --bg-color: #FDFBF8;
+            --text-color: #4A4A4A;
+            --primary-color: #4A90E2;
+            --secondary-color: #F5A623;
+            --card-bg: #FFFFFF;
+            --border-color: #EAEAEA;
+            --header-color: #333333;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            scroll-behavior: smooth;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .feature-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .tech-badge {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tech-badge:hover {
+            transform: scale(1.05);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .arch-component {
+            transition: all 0.3s ease-in-out;
+            cursor: default;
+        }
+        .arch-line {
+            transition: all 0.3s ease-in-out;
+        }
+        .highlight {
+            background-color: #EBF8FF;
+            border-color: var(--primary-color) !important;
+            transform: scale(1.03);
+        }
+        .highlight-line {
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 0 8px var(--primary-color);
+        }
+        .arch-tooltip {
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .arch-component:hover .arch-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-backdrop {
+            transition: opacity 0.3s;
+        }
+        .modal-content {
+            transition: transform 0.3s;
+        }
+        .setup-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .copy-btn {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .code-block:hover .copy-btn {
+            opacity: 1;
+        }
+        .copied-feedback {
+            transition: opacity 0.5s;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="sticky top-0 bg-white/80 backdrop-blur-md shadow-sm z-50">
+        <nav class="container mx-auto px-6 py-3">
+            <div class="flex justify-between items-center">
+                <div class="text-xl font-bold text-gray-800">Tic-Tac-Toe Project</div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#overview" class="nav-link px-2 py-1">Overview</a>
+                    <a href="#tech-stack" class="nav-link px-2 py-1">Tech Stack</a>
+                    <a href="#architecture" class="nav-link px-2 py-1">Architecture</a>
+                    <a href="#setup" class="nav-link px-2 py-1">Setup</a>
+                    <a href="#roadmap" class="nav-link px-2 py-1">Roadmap</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="overview" class="pt-16 -mt-16">
+            <div class="text-center mb-12">
+                <h1 class="text-5xl font-bold mb-4 text-gray-800">Real-Time Tic-Tac-Toe with Chat</h1>
+                <p class="text-lg max-w-3xl mx-auto">A full-stack, real-time multiplayer Tic-Tac-Toe application built with Django and React. This project features user authentication, a global chat lobby, real-time presence indicators, and private game rooms with their own dedicated chat.</p>
+                <p class="text-lg max-w-3xl mx-auto mt-2">The backend is built using Django Channels for WebSocket communication, ensuring instantaneous game moves and chat messages. The frontend is a modern single-page application built with React.</p>
+            </div>
+            
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Key Features</h2>
+            <div id="features-grid" class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            </div>
+        </section>
+
+        <section id="tech-stack" class="pt-24 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Technology Stack</h2>
+             <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">This project uses a modern, robust stack for both backend and frontend development. Click on any technology to learn more about its role. The chart provides a high-level overview of the stack's composition.</p>
+            <div class="flex flex-col lg:flex-row items-center lg:items-start gap-12">
+                <div class="w-full lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div id="backend-stack">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700 text-center">Backend</h3>
+                        <div id="backend-badges" class="flex flex-wrap gap-3 justify-center"></div>
+                    </div>
+                    <div id="frontend-stack">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700 text-center">Frontend</h3>
+                        <div id="frontend-badges" class="flex flex-wrap gap-3 justify-center"></div>
+                    </div>
+                </div>
+                <div class="w-full lg:w-1/3 mt-8 lg:mt-0">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-700 text-center">Stack Composition</h3>
+                    <div class="chart-container w-full max-w-xs mx-auto h-64 md:h-72 relative">
+                        <canvas id="techStackChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="architecture" class="pt-24 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-800">Application Architecture</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-3xl mx-auto">The application utilizes a decoupled architecture with a standard REST API for authentication and a WebSocket interface for real-time events. Hover over the components below to see how they connect and interact.</p>
+            <div id="architecture-diagram" class="bg-white p-6 sm:p-8 rounded-lg shadow-lg overflow-x-auto">
+            </div>
+        </section>
+
+        <section id="setup" class="pt-24 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-4 text-gray-800">Getting Started</h2>
+            <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.</p>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 sm:p-8">
+                <div class="mb-6">
+                     <h3 class="text-2xl font-semibold mb-4 text-gray-700">Prerequisites</h3>
+                     <ul id="prerequisites-list" class="list-disc list-inside space-y-2">
+                     </ul>
+                </div>
+
+                <div class="mb-4 border-b border-gray-200">
+                    <nav class="flex -mb-px" aria-label="Tabs">
+                        <button id="tab-backend" class="setup-tab w-1/2 py-4 px-1 text-center border-b-2 font-medium text-lg">
+                            Backend Setup
+                        </button>
+                        <button id="tab-frontend" class="setup-tab w-1/2 py-4 px-1 text-center border-b-2 font-medium text-lg">
+                            Frontend Setup
+                        </button>
+                    </nav>
+                </div>
+                <div id="setup-content">
+                </div>
+            </div>
+        </section>
+
+        <section id="roadmap" class="pt-24 -mt-16">
+            <h2 class="text-3xl font-bold text-center mb-8 text-gray-800">Future Improvements</h2>
+            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+                <ul id="roadmap-list" class="space-y-4">
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-white mt-16 border-t border-gray-200">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-600">
+            <p>This project is licensed under the MIT License.</p>
+        </div>
+    </footer>
+    
+    <div id="tech-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 modal-content scale-95">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="modal-close" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <p id="modal-description" class="text-gray-700"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const data = {
+                features: [
+                    { title: "JWT Authentication", icon: "🔐", description: "Secure user sign-up and login system." },
+                    { title: "Real-Time Presence", icon: "🟢", description: "See which users are currently online in the main lobby." },
+                    { title: "Global Chat", icon: "💬", description: "A public chat room for all connected users." },
+                    { title: "Game Invitations", icon: "📧", description: "Challenge any other online user to a game." },
+                    { title: "Private Game Rooms", icon: "🚪", description: "Each game takes place in a unique, isolated room." },
+                    { title: "Real-Time Gameplay", icon: "⚡", description: "Moves are reflected on both players' screens instantly." },
+                    { title: "In-Game Chat", icon: "✍️", description: "Each game room has its own private chat, with a persistent message history." },
+                    { title: "Scalable Backend", icon: "📈", description: "Uses Redis as a channel layer for handling multiple connections and server processes." },
+                ],
+                techStack: {
+                    backend: [
+                        { name: "Python 3.11+", description: "The core programming language for the backend, known for its readability and extensive libraries." },
+                        { name: "Django 5.x", description: "A high-level Python web framework that encourages rapid development and clean, pragmatic design." },
+                        { name: "Django REST Framework", description: "A powerful toolkit for building Web APIs, used here for authentication and user management." },
+                        { name: "Django Channels", description: "Extends Django to handle WebSockets, providing the foundation for all real-time communication." },
+                        { name: "Daphne", description: "The ASGI server required to run Django Channels, enabling asynchronous request handling." },
+                        { name: "Redis", description: "An in-memory data store used as the message broker (channel layer) to manage WebSocket state and communication across multiple server instances." },
+                        { name: "PostgreSQL", description: "A robust, open-source relational database used for storing user data and persistent chat messages in production." },
+                    ],
+                    frontend: [
+                        { name: "React 18", description: "A JavaScript library for building user interfaces, used to create the dynamic and interactive single-page application." },
+                        { name: "React Router", description: "Handles client-side routing, allowing for navigation between different views (like lobby and game room) without a full page reload." },
+                        { name: "WebSocket API", description: "The native browser API used to establish a persistent, two-way communication channel with the Django Channels backend." },
+                        { name: "`jwt-decode`", description: "A small library to decode JWTs in the client-side to access payload data like the current user's username." },
+                        { name: "CSS", description: "Custom styling is used to create the unique look and feel of the game board, chat interfaces, and overall layout." },
+                    ]
+                },
+                prerequisites: [
+                    "Git", "Python 3.11 or higher", "Node.js and npm (or yarn)", "Redis Server", "PostgreSQL (optional, for production-like setup)"
+                ],
+                setup: {
+                    backend: [
+                        { command: "# Clone the repository\ngit clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git\ncd YOUR_REPO_NAME/backend", description: "Get the project files and navigate into the backend directory." },
+                        { command: "# Create and activate a virtual environment\npython -m venv venv\n# On Windows: venv\\Scripts\\activate\n# On macOS/Linux: source venv/bin/activate", description: "Isolate project dependencies." },
+                        { command: "# Install Python dependencies\npip install -r requirements.txt", description: "Install all required backend packages." },
+                        { command: "# Create and configure environment variables\ncp .env.example .env", description: "Create your local settings file. Edit it to add your SECRET_KEY and database URL." },
+                        { command: "# Run database migrations\npython manage.py migrate", description: "Apply the database schema." },
+                        { command: "# Start the Django development server\npython manage.py runserver", description: "Run the backend server. It will be available at http://127.0.0.1:8000." },
+                    ],
+                    frontend: [
+                        { command: "# Navigate to the frontend directory\ncd ../frontend", description: "Move to the frontend project folder." },
+                        { command: "# Install JavaScript dependencies\nnpm install", description: "Install all required frontend packages." },
+                        { command: "# Start the React development server\nnpm run dev", description: "Run the frontend server. It will be available at http://localhost:5173." },
+                    ]
+                },
+                roadmap: [
+                    { title: "Spectator Mode", description: "Allow users to watch ongoing games without participating." },
+                    { title: "User Profiles", description: "Add profiles with game history, win/loss statistics, and other user details." },
+                    { title: "Game Rematches", description: "Implement a feature to offer and accept a rematch after a game concludes." },
+                    { title: "Animations", description: "Add simple, smooth animations for placing X's and O's and for highlighting winning lines to enhance user experience." },
+                ]
+            };
+
+            const featuresGrid = document.getElementById('features-grid');
+            data.features.forEach(feature => {
+                const card = document.createElement('div');
+                card.className = 'feature-card bg-white p-6 rounded-lg shadow-md border border-gray-200';
+                card.innerHTML = `
+                    <div class="text-3xl mb-4">${feature.icon}</div>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-800">${feature.title}</h3>
+                    <p>${feature.description}</p>
+                `;
+                featuresGrid.appendChild(card);
+            });
+
+            const backendBadges = document.getElementById('backend-badges');
+            data.techStack.backend.forEach(tech => {
+                const badge = document.createElement('div');
+                badge.className = 'tech-badge bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-full';
+                badge.textContent = tech.name;
+                badge.dataset.description = tech.description;
+                backendBadges.appendChild(badge);
+            });
+
+            const frontendBadges = document.getElementById('frontend-badges');
+            data.techStack.frontend.forEach(tech => {
+                const badge = document.createElement('div');
+                badge.className = 'tech-badge bg-gray-100 text-gray-700 font-medium py-2 px-4 rounded-full';
+                badge.textContent = tech.name;
+                badge.dataset.description = tech.description;
+                frontendBadges.appendChild(badge);
+            });
+            
+            const techModal = document.getElementById('tech-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDescription = document.getElementById('modal-description');
+            const modalClose = document.getElementById('modal-close');
+
+            document.querySelectorAll('.tech-badge').forEach(badge => {
+                badge.addEventListener('click', () => {
+                    modalTitle.textContent = badge.textContent;
+                    modalDescription.textContent = badge.dataset.description;
+                    techModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        techModal.querySelector('.modal-backdrop').classList.add('opacity-100');
+                        techModal.querySelector('.modal-content').classList.remove('scale-95');
+                    }, 10);
+                });
+            });
+
+            const closeModal = () => {
+                techModal.querySelector('.modal-backdrop').classList.remove('opacity-100');
+                techModal.querySelector('.modal-content').classList.add('scale-95');
+                setTimeout(() => techModal.classList.add('hidden'), 300);
+            };
+
+            modalClose.addEventListener('click', closeModal);
+            techModal.addEventListener('click', (e) => {
+                if (e.target === techModal) closeModal();
+            });
+
+            const archDiagramContainer = document.getElementById('architecture-diagram');
+            archDiagramContainer.innerHTML = `
+                <div class="grid grid-cols-5 gap-4 items-center min-w-[700px]">
+                    <div id="arch-react" data-group="1" class="arch-component col-span-1 bg-white border-2 border-gray-200 p-4 rounded-lg text-center relative">
+                        <h4 class="font-bold">React Client</h4>
+                        <p class="text-sm">Login, Game UI, Chat</p>
+                        <div class="arch-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center">User's Browser</div>
+                    </div>
+                    <div data-group="1,2" class="arch-line-container col-span-1 text-center">
+                        <div class="font-mono text-xs text-gray-500">HTTP/API</div>
+                        <div class="arch-line h-1 w-full bg-gray-300"></div>
+                        <div class="font-mono text-xs text-gray-500 mt-2">WebSocket</div>
+                    </div>
+                    <div id="arch-django" data-group="2" class="arch-component col-span-1 bg-white border-2 border-gray-200 p-4 rounded-lg text-center relative">
+                        <h4 class="font-bold">Django</h4>
+                        <p class="text-sm">REST API & Channels</p>
+                        <div class="arch-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center">Application Server</div>
+                    </div>
+                    <div data-group="2,3" class="arch-line-container col-span-1 text-center">
+                        <div class="arch-line h-1 w-full bg-gray-300"></div>
+                    </div>
+                    <div id="arch-db" data-group="3" class="arch-component col-span-1 bg-white border-2 border-gray-200 p-4 rounded-lg text-center relative">
+                        <h4 class="font-bold">PostgreSQL</h4>
+                        <p class="text-sm">Users & Messages</p>
+                        <div class="arch-tooltip absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center">Database</div>
+                    </div>
+                    <div></div>
+                    <div class="relative h-16">
+                         <div data-group="1,4" class="arch-line absolute left-1/2 top-0 h-full w-1 bg-gray-300 -translate-x-1/2"></div>
+                    </div>
+                    <div class="relative h-16">
+                        <div data-group="2,4" class="arch-line absolute left-0 top-1/2 h-1 w-full bg-gray-300 -translate-y-1/2"></div>
+                        <div data-group="2,4" class="arch-line absolute left-1/2 top-0 h-full w-1 bg-gray-300 -translate-x-1/2"></div>
+                    </div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div id="arch-redis" data-group="4" class="arch-component col-span-1 -mt-8 bg-white border-2 border-gray-200 p-4 rounded-lg text-center relative">
+                        <h4 class="font-bold">Redis</h4>
+                        <p class="text-sm">Channel Layer</p>
+                        <div class="arch-tooltip absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-gray-800 text-white text-xs rounded py-1 px-2 text-center">Message Broker</div>
+                    </div>
+                </div>
+            `;
+            
+            document.querySelectorAll('.arch-component').forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    const group = el.dataset.group;
+                    document.querySelectorAll('.arch-component, .arch-line').forEach(item => {
+                        const itemGroups = item.dataset.group ? item.dataset.group.split(',') : [];
+                        if (itemGroups.includes(group)) {
+                            item.classList.add(item.classList.contains('arch-line') ? 'highlight-line' : 'highlight');
+                        }
+                    });
+                });
+                el.addEventListener('mouseleave', () => {
+                    document.querySelectorAll('.highlight, .highlight-line').forEach(item => {
+                        item.classList.remove('highlight', 'highlight-line');
+                    });
+                });
+            });
+
+            const prerequisitesList = document.getElementById('prerequisites-list');
+            data.prerequisites.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${item}</span>`;
+                prerequisitesList.appendChild(li);
+            });
+
+            const setupContent = document.getElementById('setup-content');
+            const backendTab = document.getElementById('tab-backend');
+            const frontendTab = document.getElementById('tab-frontend');
+
+            const renderSetupContent = (type) => {
+                setupContent.innerHTML = '';
+                const steps = data.setup[type];
+                steps.forEach((step, index) => {
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'mb-6';
+                    stepEl.innerHTML = `
+                        <h4 class="text-xl font-semibold mb-2 text-gray-700">Step ${index + 1}</h4>
+                        <p class="mb-3 text-gray-600">${step.description}</p>
+                        <div class="code-block bg-gray-900 text-white rounded-md p-4 font-mono text-sm relative">
+                            <pre><code>${step.command}</code></pre>
+                            <button class="copy-btn absolute top-2 right-2 bg-gray-700 hover:bg-gray-600 text-white py-1 px-3 rounded-md text-xs">
+                                Copy
+                                <span class="copied-feedback absolute -top-8 left-1/2 -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded opacity-0">Copied!</span>
+                            </button>
+                        </div>
+                    `;
+                    setupContent.appendChild(stepEl);
+                });
+            };
+
+            backendTab.addEventListener('click', () => {
+                backendTab.classList.add('active');
+                frontendTab.classList.remove('active');
+                renderSetupContent('backend');
+            });
+
+            frontendTab.addEventListener('click', () => {
+                frontendTab.classList.add('active');
+                backendTab.classList.remove('active');
+                renderSetupContent('frontend');
+            });
+            
+            setupContent.addEventListener('click', (e) => {
+                if (e.target.closest('.copy-btn')) {
+                    const button = e.target.closest('.copy-btn');
+                    const code = button.previousElementSibling.querySelector('code').innerText;
+                    navigator.clipboard.writeText(code).then(() => {
+                        const feedback = button.querySelector('.copied-feedback');
+                        feedback.style.opacity = '1';
+                        setTimeout(() => {
+                           feedback.style.opacity = '0';
+                        }, 2000);
+                    });
+                }
+            });
+
+            backendTab.click();
+
+            const roadmapList = document.getElementById('roadmap-list');
+            data.roadmap.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-start';
+                li.innerHTML = `
+                    <span class="text-blue-500 mr-4 mt-1">✓</span>
+                    <div>
+                        <h4 class="font-semibold text-lg text-gray-800">${item.title}</h4>
+                        <p class="text-gray-600">${item.description}</p>
+                    </div>
+                `;
+                roadmapList.appendChild(li);
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+            sections.forEach(section => observer.observe(section));
+
+            const techStackChartCtx = document.getElementById('techStackChart').getContext('2d');
+            const techStackChart = new Chart(techStackChartCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Backend Technologies', 'Frontend Technologies'],
+                    datasets: [{
+                        label: 'Tech Stack Composition',
+                        data: [data.techStack.backend.length, data.techStack.frontend.length],
+                        backgroundColor: [
+                            'rgba(74, 144, 226, 0.8)',
+                            'rgba(245, 166, 35, 0.8)',
+                        ],
+                        borderColor: [
+                            'rgba(74, 144, 226, 1)',
+                            'rgba(245, 166, 35, 1)',
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' technologies';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
