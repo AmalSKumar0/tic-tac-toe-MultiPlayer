@@ -185,9 +185,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
 
+def calculate_winner(board):
+    lines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+        [0, 4, 8], [2, 4, 6],            # Diagonals
+    ]
+    for i in range(len(lines)):
+        a, b, c = lines[i]
+        if board and board[a] and board[a] == board[b] and board[a] == board[c]:
+            return board[a]
+    if board and not any(v is None for v in board):
+        return 'Draw'
+    return None
+
 class GameConsumer(AsyncWebsocketConsumer):
     game_rooms = {}
-
+    
+    # --- The 'connect' and 'disconnect' methods are correct and remain the same ---
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
@@ -200,61 +215,70 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.game_group_name, self.channel_name)
         await self.accept()
 
-        # --- Player Assignment Logic ---
         if self.game_id not in self.game_rooms:
-            self.game_rooms[self.game_id] = []
+            self.game_rooms[self.game_id] = {'players': [], 'board': [None] * 9}
         
-        players = self.game_rooms[self.game_id]
-        player_role = 'X' if not players else 'O'
+        room = self.game_rooms[self.game_id]
         
-        if len(players) < 2 and self.user.username not in [p['name'] for p in players]:
-            players.append({'name': self.user.username, 'channel': self.channel_name})
+        if len(room['players']) < 2 and self.user.username not in [p['name'] for p in room['players']]:
+            player_role = 'X' if len(room['players']) == 0 else 'O'
+            room['players'].append({'name': self.user.username, 'channel': self.channel_name})
+            
             await self.send(text_data=json.dumps({
                 'type': 'player_assignment',
                 'player': player_role,
             }))
 
-    # In GameConsumer.disconnect
-
     async def disconnect(self, close_code):
         if self.game_id in self.game_rooms:
-            # Find and remove the player who is disconnecting
-            players = self.game_rooms[self.game_id]
-            
-            # Create a new list excluding the disconnected player
-            updated_players = [p for p in players if p['channel'] != self.channel_name]
-
-            if not updated_players:
-                # If the room is now empty, remove it
-                self.game_rooms.pop(self.game_id, None)
-            else:
-                # Otherwise, just update the player list
-                self.game_rooms[self.game_id] = updated_players
-
+            self.game_rooms.pop(self.game_id, None)
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
-    
+
+
+    # --- CORRECTED 'receive' METHOD ---
     async def receive(self, text_data):
         data = json.loads(text_data)
+        message_type = data.get('type')
+        message = {}
+
+        # First, check what kind of message we received
+        if message_type == 'game_move':
+            board = data.get('board')
+            winner = calculate_winner(board)
+            
+            if winner:
+                message = {'type': 'game_over', 'board': board, 'winner': winner}
+            else:
+                message = {'type': 'game_move', 'board': board}
         
-        # Broadcast the move to the other player in the group
+        elif message_type == 'play_again':
+            # Reset the board on the server for this room
+            if self.game_id in self.game_rooms:
+                self.game_rooms[self.game_id]['board'] = [None] * 9
+            # Create the restart message
+            message = {'type': 'restart_game'}
+        
+        else:
+            return # Ignore unknown message types
+
+        # Broadcast the prepared message to the group
         await self.channel_layer.group_send(
             self.game_group_name,
             {
-                'type': 'game.move',
-                'board': data.get('board'),
+                'type': 'broadcast_message',
+                'message': message,
                 'sender_channel_name': self.channel_name
             }
         )
 
-    async def game_move(self, event):
-        # Send message to the other player (not the sender)
-        if self.channel_name != event['sender_channel_name']:
-            await self.send(text_data=json.dumps({
-                'type': 'game_move',
-                'board': event['board']
-            }))
-
-
+    # The 'broadcast_message' handler is also correct and remains the same
+    async def broadcast_message(self, event):
+        message = event['message']
+        
+        if message['type'] in ['game_over', 'restart_game']:
+            await self.send(text_data=json.dumps(message))
+        elif self.channel_name != event['sender_channel_name']:
+            await self.send(text_data=json.dumps(message))
 class GameChatConsumer(AsyncWebsocketConsumer):
     """
     A robust, production-ready consumer for handling real-time chat

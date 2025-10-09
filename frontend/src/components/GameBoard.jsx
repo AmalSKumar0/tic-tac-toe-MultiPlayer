@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Cell from './Cells';
 import '../assets/tictactoe.css'; // We'll create this CSS file next
-
+import FloatingIcons from 'FloatingIcons';
 function GameBoard() {
   const [board, setBoard] = useState(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
@@ -42,6 +42,10 @@ function GameBoard() {
       <div className="game-board-bottom">
         <div className="turn-indicator">{turn} TURN</div>
       </div>
+      <FloatingIcons />
+      <FloatingIcons />
+      <FloatingIcons />
+      <FloatingIcons />
     </div>
   );
 }

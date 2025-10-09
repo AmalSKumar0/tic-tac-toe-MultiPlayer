@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Floating Icons Tic Tac Toe</title>
     <style>
-        /* Import a Google Font */
+       /* Import a Google Font */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Fredoka+One&display=swap');
 
         /* ------------------- */
@@ -123,6 +123,7 @@
             border-radius: 20px;
             box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
             padding-bottom: 40px;
+            z-index: 100;
         }
         .hinge1,.hinge2{
             position: absolute;
@@ -163,6 +164,7 @@
             grid-template-columns: repeat(3, clamp(60px, 20vw, 100px));
             grid-template-rows: repeat(3, clamp(60px, 20vw, 100px));
             gap: 15px;
+            
         }
 
         .cell {
@@ -197,7 +199,17 @@
 
         .cell-x::before { transform: rotate(45deg); }
         .cell-x::after { transform: rotate(-45deg); }
-
+        .Button{
+            background-color: var(--text-light);
+            color: var(--board-bg);
+            padding: 0.5rem 3rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
         
         /* ------------------- */
         /* Floating Icons (UPDATED) */
@@ -208,10 +220,18 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* Place it behind the main container */
+            z-index: -1; /* Place it behind the main container */
             pointer-events: none; /* Make it non-interactive */
         }
-
+        .confetti,.loss,.draw {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            /* z-index: 9999; */
+        }
         .float-icon {
             position: absolute; /* Position will be set by JS */
             width: 100px;
@@ -260,6 +280,27 @@
         .classic-speed { background-color: var(--accent-pink); color: var(--board-bg); }
         .piece-icons { background-color: var(--accent-yellow); color: var(--board-bg); }
         .channel-reward { background-color: var(--accent-green); color: var(--board-bg); }
+
+
+.confetti.lose {
+  animation: flash-red 2s ease-in-out;
+}
+
+.confetti.draw {
+  animation: flash-green 2s ease-in-out;
+}
+
+@keyframes flash-red {
+  0% { background-color: initial; }
+  25% { background-color: rgba(255, 0, 0, 0.3); }
+  100% { background-color: initial; }
+}
+
+@keyframes flash-green {
+  0% { background-color: initial; }
+  25% { background-color: rgba(0, 255, 0, 0.3); }
+  100% { background-color: initial; }
+}
     </style>
 </head>
 <body>
@@ -288,7 +329,7 @@
         <div class="hinge1"></div>
         <div class="hinge2"></div>
         <div class="game-board-bottom">
-        <div class="turn-indicator">FLATLINE TURN</div>
+        <div class="turn-indicator"><button class="Button" onClick={handlePlayAgain}>Play Again</button></div>
         </div>
     </div>
 
