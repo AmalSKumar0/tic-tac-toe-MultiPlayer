@@ -121,26 +121,32 @@ def send_friend_request(request, user_id):
     return Response({"id": fr.id, "status": fr.status})
 
 
-# ----------------------------
-# Reject Friend Request
-# ----------------------------
-@api_view(["POST"])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def reject_friend_request(request, request_id):
-    fr = get_object_or_404(FriendRequest, id=request_id, user2=request.user)
-
-    if fr.status != "pending":
-        return Response({"detail": "Already processed"}, status=400)
-
-    fr.status = "rejected"
-    fr.save()
-    return Response({"detail": "Friend request rejected"})
-
-# views.py
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def friend_requests(request):
-    requests = FriendRequest.objects.filter(to_user=request.user, accepted=False)
+    requests = FriendRequest.objects.filter(user2=request.user, status='pending')
     serializer = FriendRequestSerializer(requests, many=True)
     return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def respond_friend_request(request, pk, action):
+    try:
+        friend_request = FriendRequest.objects.get(id=pk, user2=request.user)
+    except FriendRequest.DoesNotExist:
+        return Response({"detail": "Friend request not found."}, status=404)
+
+    if action == "accept":
+        friend_request.status = "accepted"
+        friend_request.save()
+        Friendship.objects.create(
+            user1=friend_request.user1, user2=friend_request.user2
+        )
+        return Response({"detail": "Friend request accepted."})
+
+    elif action == "reject":
+        friend_request.status = "rejected"
+        friend_request.save()
+        return Response({"detail": "Friend request rejected."})
+
+    return Response({"detail": "Invalid action."}, status=400)

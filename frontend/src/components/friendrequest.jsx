@@ -5,22 +5,32 @@ export default function FriendRequests() {
   const [requests, setRequests] = useState([]);
 
   const fetchRequests = async () => {
-    const token = localStorage.getItem("access_token");
-    const res = await axios.get("/api/friend-requests/", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setRequests(res.data);
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await axios.get("http://127.0.0.1:8000/api/friend-requests/", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRequests(res.data);
+    } catch (err) {
+      console.error("Error fetching friend requests:", err);
+    }
   };
 
-  const handleRequest = async (id, action) => {
-    const token = localStorage.getItem("access_token");
-    const url =
-      action === "accept"
-        ? `/api/accept-friend-request/${id}/`
-        : `/api/reject-friend-request/${id}/`;
-
-    await axios.post(url, {}, { headers: { Authorization: `Bearer ${token}` } });
-    fetchRequests(); // refresh list after action
+  const handleResponse = async (id, action) => {
+    try {
+      const token = localStorage.getItem("access_token");
+      await axios.post(
+        `http://127.0.0.1:8000/api/friend-request/${id}/${action}/`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert(`Request ${action}ed!`);
+      fetchRequests(); // refresh list
+    } catch (err) {
+      console.error(`Error ${action}ing friend request:`, err);
+    }
   };
 
   useEffect(() => {
@@ -28,22 +38,33 @@ export default function FriendRequests() {
   }, []);
 
   return (
-    <div>
+    <div className="friend-requests">
       <h3>Friend Requests</h3>
-      {requests.length === 0 && <p>No requests</p>}
-      <ul>
-        {requests.map((r) => (
-          <li key={r.id}>
-            {r.from}{" "}
-            <button onClick={() => handleRequest(r.id, "accept")}>
-              Accept
-            </button>{" "}
-            <button onClick={() => handleRequest(r.id, "reject")}>
-              Reject
-            </button>
-          </li>
-        ))}
-      </ul>
+      {requests.length === 0 ? (
+        <p>No pending requests.</p>
+      ) : (
+        requests.map((req) => (
+          <div key={req.id} className="request-item">
+            <span>
+              <strong>{req.user1.username}</strong> sent you a friend request.
+            </span>
+            <div>
+              <button
+                onClick={() => handleResponse(req.id, "accept")}
+                className="accept-btn"
+              >
+                Accept
+              </button>
+              <button
+                onClick={() => handleResponse(req.id, "reject")}
+                className="reject-btn"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 }

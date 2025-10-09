@@ -14,6 +14,5 @@ urlpatterns = [
     path('api/search-users/', search_users, name='search-users'),
     path('api/friend-requests/', friend_requests, name='friend-requests'),
     path('api/send-friend-request/<int:user_id>/', send_friend_request, name='send-friend-request'),
-    path('reject-friend-request/<int:request_id>/', reject_friend_request, name='reject-friend-request'),
-
+    path("api/friend-request/<int:pk>/<str:action>/", respond_friend_request, name="respond-friend-request"),
 ]
