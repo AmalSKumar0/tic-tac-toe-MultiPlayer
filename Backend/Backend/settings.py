@@ -37,6 +37,8 @@ SIMPLE_JWT = {
 # Application definition
 
 INSTALLED_APPS = [
+    "channels",
+    'daphne', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,11 +48,15 @@ INSTALLED_APPS = [
     "api",
     "rest_framework",
     "corsheaders",
-    "channels",
+    
 ]
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
     },
 }
 

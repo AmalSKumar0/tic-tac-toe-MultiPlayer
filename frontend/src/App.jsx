@@ -1,6 +1,7 @@
 import react from "react"
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Login from "./pages/login"
+import Game from "./pages/Game"
 import Register from "./pages/register"
 import Home from "./pages/home"
 import NotFound from "./pages/NotFound"
@@ -29,6 +30,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/" element={<Home />} />
+        <Route path="/game/:gameId" element={<Game />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
         <Route path="/register" element={<Register/>} />
