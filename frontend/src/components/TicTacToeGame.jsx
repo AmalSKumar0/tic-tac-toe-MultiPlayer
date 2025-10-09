@@ -27,8 +27,8 @@ function TicTacToeGame() {
     setBoard(Array(9).fill(null));
     setGameOver(false);
     setWinner(null);
-    setShowConfetti(false); // Reset confetti
-    setBackgroundFlash(''); // Reset flash
+    setShowConfetti(false); 
+    setBackgroundFlash('');
     setIsMyTurn(player === 'X'); 
   };
 
@@ -74,7 +74,6 @@ function TicTacToeGame() {
             setBackgroundFlash('lose');
           }
           // Reset the flash effect after 2 seconds
-          setTimeout(() => setBackgroundFlash(''), 2000);
           break;
         case 'restart_game':
           resetGameState();
@@ -91,7 +90,6 @@ function TicTacToeGame() {
     };
   }, [gameId, player]);
 
-  // ... (handleClick, getStatusMessage, and handlePlayAgain are the same)
   const handleClick = (index) => {
     if (!isMyTurn || board[index] || gameOver) {
       return;
@@ -123,45 +121,49 @@ function TicTacToeGame() {
 
 
   return (
-    <div className={`container`}>
-      <div className="confetti ${backgroundFlash}">
-      {showConfetti && <Confetti />}
-      </div>
-      <div className="header">
-        <h1>TIC TAC TOE</h1>
-        <div className="game-status">
-          {gameOver ? (
-             getStatusMessage()
-          ) : (
-            <div>You are Player: {player}</div>
-          )}
-         
+    // You can use a React Fragment <> to wrap the two divs
+    <>
+      {/* 1. THIS IS THE NEW DIV FOR THE FULL-SCREEN EFFECT */}
+      <div className={`background-flash ${backgroundFlash}`}></div>
+
+      {/* 2. Your container no longer needs the dynamic class */}
+      <div className="container">
+        <div className="confetti">
+          {showConfetti && <Confetti />}
         </div>
-      </div>
-      <div className="game-board-wrapper">
-        <div className="game-board">
-          {board.map((value, index) => (
-            <Cell key={index} value={value} onClick={() => handleClick(index)} />
-          ))}
+        <div className="header">
+          <h1>TIC TAC TOE</h1>
+          <div className="game-status">
+            {gameOver ? (
+              getStatusMessage()
+            ) : (
+              <div>You are Player: {player}</div>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="hinge1"></div>
-      <div className="hinge2"></div>
-      
-      <div className="game-board-bottom">
-        <div className="turn-indicator">
-          {gameOver ? (
-            <div className="play-again-container">
-              <button className="Button" onClick={handlePlayAgain}>Play Again</button>
-            </div>
-          ) : (
-            getStatusMessage()
-          )}
+        <div className="game-board-wrapper">
+          <div className="game-board">
+            {board.map((value, index) => (
+              <Cell key={index} value={value} onClick={() => handleClick(index)} />
+            ))}
+          </div>
         </div>
+        <div className="hinge1"></div>
+        <div className="hinge2"></div>
+        <div className="game-board-bottom">
+          <div className="turn-indicator">
+            {gameOver ? (
+              <div className="play-again-container">
+                <button className="Button" onClick={handlePlayAgain}>Play Again</button>
+              </div>
+            ) : (
+              getStatusMessage()
+            )}
+          </div>
+        </div>
+        <FloatingIcons />
       </div>
-      
-      <FloatingIcons />
-    </div>
+    </>
   );
 }
 
