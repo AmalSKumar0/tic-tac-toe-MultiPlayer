@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../assets/home.css"; 
+const Url = import.meta.env.VITE_API_URL;
 
 const CustomAlert = ({ message, onClose }) => { /* ... (Your CustomAlert component is perfect) ... */ };
 
@@ -10,9 +11,41 @@ export default function SocialPanel({ friends, sendGameRequest, newRequestTrigge
   const [activeTab, setActiveTab] = useState('friends');
   const [alertMessage, setAlertMessage] = useState('');
 
-  const fetchRequests = async () => { /* ... (This function is correct) ... */ };
-  const handleResponse = async (id, action) => { /* ... (This function is correct) ... */ };
+  const fetchRequests = async () => {
+  try {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
 
+    const res = await axios.get(`${Url}/api/friend-requests/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setRequests(res.data);
+  } catch (err) {
+    console.error("Error fetching friend requests:", err);
+  }
+};
+const handleResponse = async (id, action) => {
+  try {
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    await axios.post(
+      `${Url}/api/friend-request/${id}/${action}/`, 
+      {}, // POST request needs a body, even if empty
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    setAlertMessage(`Request ${action}ed successfully!`);
+    fetchRequests(); // Refresh this component's requests list
+    
+    if (action === 'accept') {
+      onFriendAction(); // Tell the parent to refresh the main friends list
+    }
+  } catch (err) {
+    setAlertMessage(`Error: Could not ${action} request.`);
+    console.error(`Error responding to friend request:`, err);
+  }
+};
   useEffect(() => {
     fetchRequests();
   }, [newRequestTrigger]);
@@ -50,23 +83,22 @@ export default function SocialPanel({ friends, sendGameRequest, newRequestTrigge
         </div>
         <div className="social-panel-body">
         {activeTab === 'requests' && (
-          <div className="requests-list">
-            {/* --- JSX FOR REQUESTS --- */}
-            {requests.length === 0 ? (
-              <p>No pending friend requests.</p>
-            ) : (
-              requests.map((req) => (
-                <div key={req.id} className="request-item">
-                  <span><strong>{req.user1.username}</strong> wants to be friends.</span>
-                  <div className="actions">
-                    <button onClick={() => handleResponse(req.id, "accept")} className="accept-btn">Accept</button>
-                    <button onClick={() => handleResponse(req.id, "reject")} className="reject-btn">Reject</button>
-                  </div>
-                </div>
-              ))
-            )}
+    <div className="requests-list">
+      {requests.length === 0 ? (
+        <p>No pending friend requests.</p>
+      ) : (
+        requests.map((req) => (
+          <div key={req.id} className="request-item">
+            <span><strong>{req.user1.username}</strong> wants to be friends.</span>
+            <div className="actions">
+              <button onClick={() => handleResponse(req.id, "accept")} className="accept-btn">Accept</button>
+              <button onClick={() => handleResponse(req.id, "reject")} className="reject-btn">Reject</button>
+            </div>
           </div>
-        )}
+        ))
+      )}
+    </div>
+  )}
         
         {activeTab === 'friends' && (
           <div className="friends-list">

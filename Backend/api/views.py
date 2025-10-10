@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from channels.layers import get_channel_layer # This import might be from my previous suggestion
 from asgiref.sync import async_to_sync     # This import might be from my previous suggestion
-
+from django.db.models import Q
 from .serializers import UserSerializer , FriendRequestSerializer
 from .models import Friendship, FriendRequest, Presence
 

@@ -128,11 +128,12 @@
             border-radius: 35px;
             z-index: 200;
         }
+        
         .hinge1{
-            left: 100px;
+            left: 50px;
         }
         .hinge2{
-            right: 100px;
+            right: 50px;
         }
         /* ------------------- */
         /* Turn Indicator */
@@ -195,15 +196,24 @@
         .Button{
             background-color: var(--text-light);
             color: var(--board-bg);
-            padding: 0.5rem 3rem;
+            padding: 0.5rem 1rem;
             border: none;
             border-radius: 25px;
             font-weight: 700;
             box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: background-color 0.3s ease;
+            display: block;
+            margin: 0 auto; 
         }
-        
+
+        .play-again-container{
+            display: flex;
+            flex-direction: row; /* Changed from column to row */
+            gap: 0px; 
+            justify-content: center; /* Center children horizontally */
+            align-items: center;     /* Center children vertically */
+        }
         /* ------------------- */
         /* Floating Icons (UPDATED) */
         /* ------------------- */
@@ -329,7 +339,10 @@
         .piece-icons { background-color: var(--accent-yellow); color: var(--board-bg); }
         .channel-reward { background-color: var(--accent-green); color: var(--board-bg); }
 
-
+.surrender-container{
+    position: fixed;
+    bottom: 90px;
+}
  .chat-box {
             position: fixed;
             bottom: 2rem;
@@ -430,6 +443,10 @@
         .chat-toggle-button:hover {
             transform: scale(1.1);
         }
+        .game-over-controls{
+    display: flex;
+    flex-direction: row;
+        }
 .notification-badge {
   position: absolute;
   top: 5px; /* Adjust as needed */
@@ -467,3 +484,64 @@
      background-color: var(--accent-blue);
 }
 
+.notification-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(45, 48, 98, 0.9); /* Glassmorphism effect */
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 1.2rem 2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    z-index: 2000;
+    animation: slide-down 0.5s ease-out;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+.notification-content p {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.notification-content p strong {
+    color: #f9badf;
+}
+
+.notification-actions button {
+    border: none;
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    color: #2d3062;
+}
+
+.notification-actions .accept-btn {
+    background-color: #b5f5d6;
+}
+
+.notification-actions .decline-btn {
+    background-color: #f779ab;
+}
+
+@keyframes slide-down {
+    from {
+        top: -100px;
+        opacity: 0;
+    }
+    to {
+        top: 20px;
+        opacity: 1;
+    }
+}

@@ -6,7 +6,8 @@ import HomeBoard from "../components/homeBoard";
 import '../assets/home.css';
 import GlobalChat from "../components/GlobalChat";
 import FloatingIcons from '../components/FloatingIcons';
-
+const Url = import.meta.env.VITE_API_URL;
+const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 
 export default function Home() {
   const [friends, setFriends] = useState([]);
@@ -20,7 +21,7 @@ export default function Home() {
       const token = localStorage.getItem("access_token");
       if (!token) return;
       
-      const res = await axios.get("http://127.0.0.1:8000/api/friends/", {
+      const res = await axios.get(`${Url}/api/friends/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFriends(res.data || []); // Use res.data and fallback to an empty array
@@ -35,7 +36,7 @@ export default function Home() {
       if (!token) return;
 
       await axios.post(
-        `http://127.0.0.1:8000/api/game-request/${friendId}/`,
+        `${Url}/api/game-request/${friendId}/`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -69,7 +70,7 @@ const handleDeclineInvite = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
     
-    presenceSocket.current = new WebSocket(`ws://127.0.0.1:8000/ws/presence/?token=${token}`);
+    presenceSocket.current = new WebSocket(`${websocketUrl}/ws/presence/?token=${token}`);
 
     presenceSocket.current.onmessage = (event) => {
       const data = JSON.parse(event.data);

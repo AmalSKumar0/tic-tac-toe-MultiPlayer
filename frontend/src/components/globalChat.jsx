@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import 'boxicons/css/boxicons.min.css';
 // Make sure your main CSS file is imported
 // import '../assets/YourStyles.css';
+const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 
 function GlobalChat() {
   const [messages, setMessages] = useState([]);
@@ -26,7 +27,7 @@ function GlobalChat() {
     const decodedToken = jwtDecode(token);
     setCurrentUser(decodedToken.username);
     
-    socket.current = new WebSocket(`ws://127.0.0.1:8000/ws/chat/?token=${token}`);
+    socket.current = new WebSocket(`${websocketUrl}/ws/chat/?token=${token}`);
 
     socket.current.onopen = () => console.log("Global chat WebSocket connected!");
     socket.current.onclose = () => console.log("Global chat WebSocket disconnected.");

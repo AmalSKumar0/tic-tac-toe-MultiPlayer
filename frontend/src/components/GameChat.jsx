@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import '../assets/TicTacToe.css';
 import 'boxicons/css/boxicons.min.css';
+const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 
 function GameChat() {
   const { gameId } = useParams();
@@ -27,7 +28,7 @@ function GameChat() {
     setCurrentUser(decodedToken.username);
 
     chatSocket.current = new WebSocket(
-      `ws://127.0.0.1:8000/ws/gameChat/${gameId}/?token=${token}`
+      `${websocketUrl}/ws/gameChat/${gameId}/?token=${token}`
     );
 
     chatSocket.current.onopen = () => console.log(`Chat socket connected!`);
