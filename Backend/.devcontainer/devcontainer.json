@@ -1,0 +1,8 @@
+{
+  "name": "Django Tic-Tac-Toe Backend",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "web",
+  "workspaceFolder": "/app",
+  "forwardPorts": [8000],
+  "postCreateCommand": "python manage.py migrate"
+}

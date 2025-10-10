@@ -1,0 +1,37 @@
+# .devcontainer/docker-compose.yml
+version: '3.8'
+services:
+  db:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=tictactoe
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=tictactoe_db
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+
+  web:
+    # This builds the Dockerfile from the main project folder
+    build: .. 
+    command: daphne -b 0.0.0.0 -p 8000 Backend.asgi:application
+    restart: unless-stopped
+    volumes:
+      # This syncs your code so you can edit it live
+      - ..:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY= "91xg(t(a^#zn$!p9w(1pxhe^ipfvd#7a@8-p1hm+7rht2bf3+z"
+      - DATABASE_URL=postgres://tictactoe:password@db:5432/tictactoe_db
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
