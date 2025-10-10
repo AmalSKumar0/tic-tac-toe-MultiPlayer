@@ -1,0 +1,8 @@
+# Ignore the entire frontend project
+frontend/
+node_modules/
+
+# Ignore Git history and other dev files
+.git/
+.gitignore
+.devcontainer/
