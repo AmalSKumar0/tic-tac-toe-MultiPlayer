@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound"
 import FriendSearch from "./pages/search"
 import ProtectedRoute from "./components/ProtectedRoute"
 
+
 function Logout() {
   localStorage.clear()
   return <Navigate to="/login" />

@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Fredoka+One&display=swap');
+
+:root {
+    --bg-color: #595de0;
+    --board-bg: #2d3062;
+    --cell-bg: #404481;
+    --text-light: #ffffff;
+    --accent-pink: #f9badf;
+    --accent-yellow: #fde89d;
+    --accent-green: #b5f5d6;
+    --accent-blue: #a3d5ff;
+    --font-primary: 'Fredoka One', cursive;
+    --font-secondary: 'Poppins', sans-serif;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2.5rem;
+    background-color: var(--board-bg);
+    border-radius: 20px;
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+}
+
+.form-container h1 {
+    font-family: var(--font-primary);
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    letter-spacing: 0.1rem;
+    color: var(--text-light);
+    text-shadow: 3px 3px 0px var(--cell-bg);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    max-width: 600px;
+    width: 100%;
+    border: none;
+    padding: 1rem 1.25rem;
+    border-radius: 15px;
+    background-color: var(--cell-bg);
+    color: var(--text-light);
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-blue);
+    background-color: #494e8f;
+}
+
+.form-button {
+    background-color: var(--accent-yellow);
+    color: var(--board-bg);
+    padding: 0.75rem 3rem;
+    border: none;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.05rem;
+    box-shadow: 4px 4px 0px var(--cell-bg);
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 1rem;
+}
+
+.form-button:hover {
+    background-color: #fce17c;
+    transform: translateY(-2px);
+}
+
+.form-button:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--cell-bg);
+}
+
+.form-error {
+    text-align: center;
+    color: var(--accent-pink);
+    font-weight: 700;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: rgba(249, 186, 223, 0.1);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-indicator {
+    width: 24px;
+    height: 24px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--accent-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0.5rem auto;
+}

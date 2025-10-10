@@ -330,3 +330,140 @@
         .channel-reward { background-color: var(--accent-green); color: var(--board-bg); }
 
 
+ .chat-box {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 350px;
+            background-color: var(--board-bg);
+            border-radius: 20px;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            /* NEW: Hide by default */
+            transform-origin: bottom right; /* Animate from the corner */
+            transform: scale(0);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s;
+        }
+        
+        /* NEW: Class to show the chat box */
+        .chat-box.visible {
+            transform: scale(1);
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background-color: #232657;
+            text-align: center;
+            position: relative; /* Needed for positioning the close button */
+        }
+
+        .chat-header h3 {
+            font-family: var(--font-primary);
+            letter-spacing: 0.1rem;
+            margin: 0;
+        }
+        
+        /* NEW: Close button ('X') styles */
+        .chat-close-button {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-family: var(--font-secondary);
+            cursor: pointer;
+            padding: 0 0.5rem;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+        
+        .chat-close-button:hover {
+            opacity: 1;
+        }
+
+        /* --- (Other chat styles are the same) --- */
+        .chat-messages { padding: 1rem; height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-messages::-webkit-scrollbar { width: 8px; }
+        .chat-messages::-webkit-scrollbar-track { background: var(--board-bg); }
+        .chat-messages::-webkit-scrollbar-thumb { background-color: var(--cell-bg); border-radius: 20px; }
+        .message { padding: 0.75rem 1rem; border-radius: 15px; max-width: 80%; word-wrap: break-word; }
+        .message.sent { align-self: flex-end; background-color: var(--accent-blue); color: var(--board-bg); font-weight: 700; }
+        .message.received { align-self: flex-start; background-color: var(--cell-bg); }
+        .chat-input-area { display: flex; padding: 1rem; background-color: #232657; gap: 0.5rem; }
+        .chat-input-area input { flex-grow: 1; border: none; padding: 0.75rem; border-radius: 25px; background-color: var(--cell-bg); color: var(--text-light); font-family: var(--font-secondary); font-size: 1rem; }
+        .chat-input-area input:focus { outline: 2px solid var(--accent-blue); }
+        .chat-input-area button { border: none; background-color: var(--text-light); color: var(--board-bg); font-weight: 700; border-radius: 25px; padding: 0.5rem 1.5rem; cursor: pointer; box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1); }
+        
+        /* ------------------- */
+        /* NEW: Chat Toggle Button (Bell) */
+        /* ------------------- */
+        .chat-toggle-button {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 60px;
+            height: 60px;
+            background-color: var(--board-bg);
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+        
+        .chat-toggle-button:hover {
+            transform: scale(1.1);
+        }
+.notification-badge {
+  position: absolute;
+  top: 5px; /* Adjust as needed */
+  right: 5px; /* Adjust as needed */
+
+  background-color: var(--o-color); /* A bright color from your palette */
+  color: var(--text-light);
+
+  width: 24px;
+  height: 24px;
+  border-radius: 50%; /* Makes it a circle */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: var(--font-secondary);
+}
+.bx{
+    color: var(--text-light);
+}
+.go-to-friends-link{
+    text-decoration: none;
+    color: var(--text-light);
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    background-color: darken(var(--accent-blue), 5%);
+    transition: background-color 0.3s ease;
+}
+
+.go-to-friends-link:hover{
+     background-color: var(--accent-blue);
+}
+

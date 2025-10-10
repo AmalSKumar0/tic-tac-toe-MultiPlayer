@@ -1,0 +1,130 @@
+/* ------------------- */
+/* Friend Search Styles */
+/* ------------------- */
+:root {
+      --board-bg: #2d3062;
+      --cell-bg: #404481;
+      --text-light: #ffffff;
+      --accent-green: #b5f5d6;
+      --accent-pink: #f9badf;
+      --o-color: #f779ab;
+      --x-color: #7ad3f6;
+      --font-primary: 'Fredoka One', cursive;
+      --font-secondary: 'Poppins', sans-serif;
+    }
+/* Container for the entire search component */
+.friend-search-container {
+    /* Mimics the structure of chat-box or friend-requests-box body */
+    background-color: var(--board-bg);
+    border-radius: 20px;
+    padding: 1rem; /* Padding inside the search box */
+    box-shadow: 8px 8px 0px rgba(0, 0, 0, 0.1);
+    /* Set a max width if this is displayed outside of a pop-up */
+    max-width: 400px; 
+    margin: 2rem auto; 
+}
+
+/* Search Input Area */
+.search-input-area {
+    display: flex;
+    gap: 0.5rem;
+    padding-bottom: 1rem; /* Space before results */
+    border-bottom: 1px solid var(--cell-bg); /* Separator */
+    margin-bottom: 1rem;
+}
+
+/* Input Field Style - Inherits from chat input */
+.search-input-field {
+    flex-grow: 1;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 25px;
+    background-color: var(--cell-bg);
+    color: var(--text-light);
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+}
+.search-input-field:focus {
+    outline: 2px solid var(--accent-blue);
+}
+
+/* Search Button Style - Customized from the general Button */
+.search-button {
+    /* Use 'Button' from tictactoe.css as base */
+    padding: 0.5rem 1rem;
+    background-color: var(--accent-green); /* Use a different accent for search */
+    color: var(--board-bg);
+    box-shadow: 4px 4px 0px var(--cell-bg); 
+    flex-shrink: 0; /* Prevent it from shrinking */
+}
+
+/* Results List Container - Mimics scrollable list */
+.search-results-list {
+    max-height: 200px;
+    overflow-y: auto;
+    /* Custom scrollbar matching existing styles */
+    scrollbar-color: var(--cell-bg) var(--board-bg); /* Firefox */
+}
+.search-results-list::-webkit-scrollbar { width: 8px; }
+.search-results-list::-webkit-scrollbar-track { background: var(--board-bg); }
+.search-results-list::-webkit-scrollbar-thumb { background-color: var(--cell-bg); border-radius: 20px; }
+
+
+.search-results-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Individual Result Item - Mimics request-item */
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--cell-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 15px;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.user-username {
+    font-weight: 700;
+    color: var(--accent-yellow);
+}
+
+/* Add Friend Button Style - Based on accept-btn */
+.send-request-btn {
+    border: none; 
+    border-radius: 10px;
+    padding: 0.5rem 1rem; 
+    font-weight: 700;
+    cursor: pointer; 
+    color: var(--board-bg);
+    background-color: var(--accent-pink); /* Stand out as a main action */
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.send-request-btn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Disabled/Sent state */
+.send-request-btn.sent-disabled {
+    background-color: var(--accent-blue);
+    color: var(--text-light);
+    cursor: default;
+    opacity: 0.6;
+}
+
+/* Text styles for messages (Loading/No Users Found) */
+.loading-text, .no-results-text {
+    text-align: center;
+    padding: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+}

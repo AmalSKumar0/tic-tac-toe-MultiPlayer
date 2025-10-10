@@ -6,7 +6,7 @@ function Game() {
   return (
     <div className="game-room-container">
       <div className="game-area">
-        <TicTacToeGame /> {/* Use the game component here */}
+        <TicTacToeGame /> 
       </div>
       <div className="chat-area">
         <GameChat />
