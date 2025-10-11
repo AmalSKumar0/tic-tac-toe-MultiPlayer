@@ -31,11 +31,10 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<Home />} />
         <Route path="/game/:gameId" element={<Game />} />
         <Route path="/login" element={<Login />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/register" element={<Register/>} />
+        <Route path="/register" element={<RegisterAndLogout />} /> 
         <Route path="/friends" element={<FriendSearch/>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
