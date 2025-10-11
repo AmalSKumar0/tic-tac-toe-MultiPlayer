@@ -3,7 +3,26 @@ import axios from "axios";
 import "../assets/home.css"; 
 const Url = import.meta.env.VITE_API_URL;
 
-const CustomAlert = ({ message, onClose }) => { /* ... (Your CustomAlert component is perfect) ... */ };
+const CustomAlert = ({ message, onClose }) => {
+  if (!message) {
+    return null;
+  }
+
+  return (
+    <div className="custom-alert-overlay" onClick={onClose}>
+      <div className="custom-alert-box" onClick={e => e.stopPropagation()}>
+        <p>{message}</p>
+        <button onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+};
+
+const getStatusClass = (status) => {
+  if (status === 'online') return 'online-dot';
+  if (status === 'in-game') return 'in-game-dot';
+  return 'offline-dot';
+};
 
 export default function SocialPanel({ friends, sendGameRequest, newRequestTrigger, onFriendAction }) {
   const [requests, setRequests] = useState([]);
@@ -101,21 +120,26 @@ const handleResponse = async (id, action) => {
   )}
         
         {activeTab === 'friends' && (
-          <div className="friends-list">
-            <a href="/friends" className="go-to-friends-link">Add Friends</a>
-            {friends && friends.length > 0 ? (
-              friends.map((friend) => (
-                <div key={friend.id} className="friend-item">
-                  <div className="friend-info">
-                    <span className={friend.status === "online" ? "online-dot" : "offline-dot"}></span>
-                    {friend.username}
+            <div className="friends-list">
+              <a href="/friends" className="go-to-friends-link">Add Friends</a>
+              {friends && friends.length > 0 ? (
+                friends.map((friend) => (
+                  <div key={friend.id} className="friend-item">
+                    <div className="friend-info">
+                      {/* ✅ MODIFIED LINE: Use the helper function */}
+                      <span className={getStatusClass(friend.status)}></span>
+                      {friend.username}
+                      {/* Optional: Add text to show the status */}
+                      {friend.status === 'in-game' && <span className="status-text"> (In Game)</span>}
+                    </div>
+                    
+                    {/* ✅ CORRECT LOGIC: Show play button only if friend is online, not in-game */}
+                    {friend.status === "online" && (
+                      <button onClick={() => sendGameRequest(friend.id)} className="play-btn">Play</button>
+                    )}
                   </div>
-                  {friend.status === "online" && (
-                    <button onClick={() => sendGameRequest(friend.id)} className="play-btn">Play</button>
-                  )}
-                </div>
-              ))
-            ) : (
+                ))
+              ) : (
               <p>No friends to show. Add some!</p>
             )}
           </div>

@@ -6,6 +6,7 @@ from channels.db import database_sync_to_async
 from .models import Friendship, Presence  # Remove 'User' from this import
 import uuid
 import json
+from django.db import transaction
 User = get_user_model()
 import json
 import logging
@@ -56,55 +57,13 @@ class PresenceConsumer(AsyncWebsocketConsumer):
                     {
                         'type': 'friend.status.update',
                         'user_id': self.user.id,
+                        'username': self.user.username,
                         'status': 'offline'
                     }
                 )
             
             # Leave the user group
             await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
-
-    async def receive(self, text_data):
-        # This is where you would handle messages sent FROM the client
-        # For example, accepting/rejecting game invites
-        data = json.loads(text_data)
-        action = data.get('action')
-
-        if action == 'accept_game_invite':
-            # Logic to handle game acceptance
-            pass
-        # Add other actions as needed
-
-    # --- Event Handlers from Server -> Client ---
-
-    async def friend_status_update(self, event):
-        """ Handles friend status updates (online/offline). """
-        await self.send(text_data=json.dumps(event))
-
-    async def friend_request_new(self, event):
-        """ Handles receiving a new friend request. """
-        await self.send(text_data=json.dumps(event))
-
-    async def friend_request_accepted(self, event):
-        """ Handles a sent friend request being accepted. """
-        await self.send(text_data=json.dumps(event))
-
-    async def game_invite(self, event):
-        """ Handles receiving a new game invite. """
-        await self.send(text_data=json.dumps(event))
-        
-    # --- Database Methods ---
-
-    @database_sync_to_async
-    def get_user_friends(self):
-        """ Fetches the user's friends from the database. """
-        friendships = Friendship.objects.filter(Q(user1=self.user) | Q(user2=self.user))
-        friend_ids = {fs.user2.id if fs.user1_id == self.user.id else fs.user1.id for fs in friendships}
-        return list(User.objects.filter(id__in=friend_ids))
-
-    @database_sync_to_async
-    def update_user_presence(self, user, status):
-        """ Updates the Presence model for the user. """
-        Presence.objects.update_or_create(user=user, defaults={'status': status})
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -121,6 +80,41 @@ class PresenceConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(f'user_{sender_id}', start_game_message)
             await self.channel_layer.group_send(f'user_{recipient.id}', start_game_message)
 
+        elif action == 'enter_game':
+            # Set user status to in-game and notify friends
+            await self.update_user_presence(self.user, 'in-game')
+            friends = await self.get_user_friends()
+            for friend in friends:
+                await self.channel_layer.group_send(
+                    f'user_{friend.id}',
+                    {
+                        'type': 'friend.status.update',
+                        'user_id': self.user.id,
+                        'username': self.user.username,
+                        'status': 'in-game'
+                    }
+                )
+
+        # Add other actions as needed
+
+    # --- Event Handlers from Server -> Client ---
+
+    async def friend_status_update(self, event):
+        """ Handles friend status updates (online/offline/in-game). """
+        await self.send(text_data=json.dumps(event))
+
+    async def friend_request_new(self, event):
+        """ Handles receiving a new friend request. """
+        await self.send(text_data=json.dumps(event))
+
+    async def friend_request_accepted(self, event):
+        """ Handles a sent friend request being accepted. """
+        await self.send(text_data=json.dumps(event))
+
+    async def game_invite(self, event):
+        """ Handles receiving a new game invite. """
+        await self.send(text_data=json.dumps(event))
+        
     async def game_start(self, event):
         """
         Handler for the game.start message. Sends the game_id to the client.
@@ -129,6 +123,26 @@ class PresenceConsumer(AsyncWebsocketConsumer):
             'type': 'game.start',
             'game_id': event['game_id']
         }))
+
+    # --- Database Methods ---
+
+    @database_sync_to_async
+    def get_user_friends(self):
+        """ Fetches the user's friends from the database. """
+        friendships = Friendship.objects.filter(Q(user1=self.user) | Q(user2=self.user))
+        friend_ids = {fs.user2.id if fs.user1_id == self.user.id else fs.user1.id for fs in friendships}
+        return list(User.objects.filter(id__in=friend_ids))
+
+    from django.db import transaction
+    from django.db.models import F
+
+    @database_sync_to_async
+    def update_user_presence(self, user, status):
+        """ Atomically updates the Presence model for the user to avoid race conditions. """
+        with transaction.atomic():
+            obj, created = Presence.objects.select_for_update().get_or_create(user=user)
+            obj.status = status
+            obj.save()
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -201,35 +215,38 @@ def calculate_winner(board):
 
 class GameConsumer(AsyncWebsocketConsumer):
     game_rooms = {}
-   
+
     async def connect(self):
         self.user = self.scope["user"]
         if self.user.is_anonymous:
             await self.close()
             return
-        
+
         self.game_id = self.scope['url_route']['kwargs']['game_id']
         self.game_group_name = f'game_{self.game_id}'
 
         await self.channel_layer.group_add(self.game_group_name, self.channel_name)
         await self.accept()
+        # Only set status to 'in-game' if not already 'in-game'
+        await self.update_user_presence(self.user, 'in-game')
 
         if self.game_id not in self.game_rooms:
             self.game_rooms[self.game_id] = {'players': [], 'board': [None] * 9}
-        
+
         room = self.game_rooms[self.game_id]
-        
+
         if len(room['players']) < 2 and self.user.username not in [p['name'] for p in room['players']]:
             player_role = 'X' if len(room['players']) == 0 else 'O'
             room['players'].append({'name': self.user.username, 'channel': self.channel_name})
-            
+
             await self.send(text_data=json.dumps({
                 'type': 'player_assignment',
                 'player': player_role,
             }))
 
     async def disconnect(self, close_code):
-        # Notify the other player that this player's connection dropped
+        # If user leaves game, set status back to 'online' (not 'offline')
+        await self.update_user_presence(self.user, 'online')
         await self.channel_layer.group_send(
             self.game_group_name,
             {'type': 'broadcast_opponent_left', 'sender_channel_name': self.channel_name}
@@ -238,7 +255,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.game_rooms.pop(self.game_id, None)
         await self.channel_layer.group_discard(self.game_group_name, self.channel_name)
 
-    # --- REFACTORED 'receive' METHOD ---
     async def receive(self, text_data):
         data = json.loads(text_data)
         message_type = data.get('type')
@@ -253,7 +269,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.broadcast_game_state(board, winner)
 
         elif message_type == 'surrender':
-            # Determine the winner without disconnecting
             winner_role = 'O' if room['players'][0]['channel'] == self.channel_name else 'X'
             await self.broadcast_game_state(room['board'], winner_role)
 
@@ -262,10 +277,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             await self.broadcast_game_state(room['board'], None, restart=True)
 
         elif message_type == 'leave_game':
-            # Gracefully close the connection, which will trigger disconnect()
             await self.close()
-    
-    # --- NEW UNIFIED BROADCASTING METHOD ---
+
     async def broadcast_game_state(self, board, winner, restart=False):
         message = {}
         if restart:
@@ -284,19 +297,21 @@ class GameConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    # --- NEW UNIFIED MESSAGE HANDLER ---
     async def game_message_handler(self, event):
         message = event['message']
-        # Always send game_over and restart_game to everyone
         if message['type'] in ['game_over', 'restart_game']:
             await self.send(text_data=json.dumps(message))
-        # Only send game_move to the other player
         elif self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps(message))
-            
+
     async def broadcast_opponent_left(self, event):
         if self.channel_name != event['sender_channel_name']:
             await self.send(text_data=json.dumps({'type': 'opponent_left'}))
+
+    @database_sync_to_async
+    def update_user_presence(self, user, status):
+        """ Updates the Presence model for the user. """
+        Presence.objects.update_or_create(user=user, defaults={'status': status})
 
             
 class GameChatConsumer(AsyncWebsocketConsumer):

@@ -76,8 +76,15 @@ const handleDeclineInvite = () => {
       const data = JSON.parse(event.data);
       switch (data.type) {
         case 'friend.status.update':
-          fetchFriends(); // Easiest way to update status is to refetch
-          break;
+        console.log(`Status update for ${data.username}: ${data.status}`);
+        setFriends(prevFriends => 
+          prevFriends.map(friend => 
+            friend.id === data.user_id 
+              ? { ...friend, status: data.status }
+              : friend                         
+          )
+        );
+        break;
         case 'friend.request.new':
           setNewRequestTrigger(Date.now()); // Trigger the SocialPanel to update
           break;
@@ -92,7 +99,11 @@ const handleDeclineInvite = () => {
           break;
       }
     };
-    // ... cleanup logic
+     return () => {
+    if (presenceSocket.current) {
+        presenceSocket.current.close();
+    }
+  };
   }, [navigate]);
 
   return (
