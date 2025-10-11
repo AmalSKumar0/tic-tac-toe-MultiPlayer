@@ -5,7 +5,7 @@ function Register() {
     return (
         <>
             <Form route="/api/user/register/" method="register" />
-            <a href="/login">Already have an account? Login here.</a>
+            <Link to="/login">Already have an account? Login here.</Link>
             <FloatingIcons />
         </>
     )
