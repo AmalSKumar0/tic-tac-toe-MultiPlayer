@@ -1,5 +1,6 @@
 import Form from "../components/Form"
 import FloatingIcons from '../components/FloatingIcons';
+import { Link } from "react-router-dom";
 
 function Register() {
     return (
