@@ -1,6 +1,6 @@
 // src/pages/Game.jsx
 import GameChat from '../components/GameChat';
-import TicTacToeGame from '../components/TicTacTOEGame'; // Import the new component
+import TicTacToeGame from '../components/TicTacToeGame'; // Import the new component
 
 function Game() {
   return (
