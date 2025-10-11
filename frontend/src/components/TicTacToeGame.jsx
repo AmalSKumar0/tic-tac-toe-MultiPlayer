@@ -6,7 +6,7 @@ const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 import Cell from './Cells';
 import Notification from './Notification';
 import FloatingIcons from './FloatingIcons';
-import '../assets/TicTacToe.css';
+import '../assets/tictactoe.css';
 
 function TicTacToeGame() {
   const { gameId } = useParams();
