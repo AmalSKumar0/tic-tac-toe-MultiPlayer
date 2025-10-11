@@ -1,78 +1,64 @@
 from pathlib import Path
 from datetime import timedelta
-from dotenv import load_dotenv
 import os
-import dj_database_url
-
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# --- Security Settings for Development ---
+# WARNING: keep the secret key used in production secret!
+# This simple key is fine for your local machine.
+SECRET_KEY = 'django-insecure-local-development-key'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# WARNING: don't run with debug turned on in production!
+DEBUG = True
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-exhhu8r4cw7a(&!%a-_*w@i1!!324!pu#^^k%!1*5wlxnd=t(c'
+# The dev server automatically handles hosts when DEBUG is True.
+ALLOWED_HOSTS = []
 
-DEBUG = False
 
-ALLOWED_HOSTS = ['*']  
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ],
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
-    ],
-}
-
-SIMPLE_JWT = {
-"ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-"REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-}
-
-# Application definition
-
+# --- Application Definitions ---
 INSTALLED_APPS = [
-    "channels",
-    'daphne', 
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "api",
-    "rest_framework",
-    "corsheaders",
-    
+
+    # Your Apps
+    'api',
+
+    # Third-Party Apps
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
-DATABASES = {'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))}
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
-        },
-    },
-}
 
-
+# --- Middleware ---
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # Handles Cross-Origin Resource Sharing
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "corsheaders.middleware.CorsMiddleware",
 ]
+
+# --- CORS Settings for Local Development ---
+# Allow your local React/Vue/etc. app to connect.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173", # Standard Vite/React port
+    "http://localhost:3000", # Standard Create React App port
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'Backend.urls'
 
@@ -83,6 +69,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -90,66 +77,52 @@ TEMPLATES = [
         },
     },
 ]
+
+# Use ASGI to support Channels (WebSockets)
 ASGI_APPLICATION = "Backend.asgi.application"
-WSGI_APPLICATION = 'Backend.wsgi.application'
 
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+# --- Database (Simplified for Local Dev) ---
+# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+# This uses a simple file-based database. No external server needed.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+# --- Channels (Simplified for Local Dev) ---
+# This uses an in-memory layer. No Redis server is needed to run locally!
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+}
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# --- Static files (CSS, JavaScript, Images) ---
+# https://docs.djangoproject.com/en/5.0/howto/static-files/
+# The development server handles static files automatically with these settings.
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
+# --- Django Rest Framework and JWT Settings ---
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
+
+# --- Default primary key field type ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
