@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import '../assets/TicTacToe.css';
+import '../assets/tictactoe.css'; 
 import 'boxicons/css/boxicons.min.css';
 const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;
 

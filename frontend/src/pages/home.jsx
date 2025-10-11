@@ -4,7 +4,7 @@ import axios from "axios";
 import SocialPanel from "../components/SocialPanel"; 
 import HomeBoard from "../components/homeBoard";
 import '../assets/home.css';
-import GlobalChat from "../components/GlobalChat";
+import GlobalChat from "../components/globalChat";
 import FloatingIcons from '../components/FloatingIcons';
 const Url = import.meta.env.VITE_API_URL;
 const websocketUrl = import.meta.env.VITE_WEBSOCKET_URL;

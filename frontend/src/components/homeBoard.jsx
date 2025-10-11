@@ -1,6 +1,6 @@
 
 import React from 'react';
-import '../assets/tictactoe.css';
+import '../assets/tictactoe.css'; 
 
 function HomeBoard() {
   return (
