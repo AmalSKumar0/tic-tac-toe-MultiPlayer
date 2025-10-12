@@ -1,64 +1,47 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+import dj_database_url
+from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Security Settings for Development ---
-# WARNING: keep the secret key used in production secret!
-# This simple key is fine for your local machine.
-SECRET_KEY = 'django-insecure-local-development-key'
-
-# WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-# The dev server automatically handles hosts when DEBUG is True.
-ALLOWED_HOSTS = []
-
+# --- Security Settings ---
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-dev')
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.netlify.app/',
+]
 
 # --- Application Definitions ---
 INSTALLED_APPS = [
     'daphne',
-    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
-
-    # Your Apps
-    'api',
-
-    # Third-Party Apps
-    'rest_framework',
-    'rest_framework_simplejwt',
+    "api",
+    "rest_framework",
+    "rest_framework_simplejwt",
     'corsheaders',
+    "channels",
 ]
 
-
-# --- Middleware ---
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # Handles Cross-Origin Resource Sharing
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",  
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
-# --- CORS Settings for Local Development ---
-# Allow your local React/Vue/etc. app to connect.
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173", # Standard Vite/React port
-    "http://localhost:3000", # Standard Create React App port
-    "http://127.0.0.1:5173",
-]
-CORS_ALLOW_CREDENTIALS = True
-
 
 ROOT_URLCONF = 'Backend.urls'
 
@@ -78,51 +61,73 @@ TEMPLATES = [
     },
 ]
 
-# Use ASGI to support Channels (WebSockets)
 ASGI_APPLICATION = "Backend.asgi.application"
 
-
-# --- Database (Simplified for Local Dev) ---
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-# This uses a simple file-based database. No external server needed.
+# --- DATABASE CONFIGURATION (FIXED) ---
+# This now provides a default value for local development inside Codespaces,
+# while still using the environment variable for production.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_uI7oUbjMadN8@ep-fragrant-rain-aeez2ai5-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'),
+        conn_max_age=600,
+        ssl_require=False # SSL is not needed for local Docker communication
+    )
 }
 
 
-# --- Channels (Simplified for Local Dev) ---
-# This uses an in-memory layer. No Redis server is needed to run locally!
+# --- CORS and CSRF Settings ---
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://tic-tac-toe-multi-player-z37i-git-main-amalskumar0s-projects.vercel.app",
+# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://toetactoe.netlify.app",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+# --- Channels and Redis ---
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://redis:6379')]
+        },
     },
 }
 
-
-# --- Static files (CSS, JavaScript, Images) ---
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-# The development server handles static files automatically with these settings.
+# --- Static Files (for Whitenoise) ---
 STATIC_URL = 'static/'
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # --- Django Rest Framework and JWT Settings ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.IsAuthenticated"
     ],
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
-
-# --- Default primary key field type ---
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
