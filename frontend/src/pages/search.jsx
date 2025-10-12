@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import "../styles/search.css";
 import FloatingIcons from '../components/FloatingIcons';
+const Url = import.meta.env.VITE_API_URL;
 
 export default function FriendSearch() {
   const [query, setQuery] = useState("");
@@ -17,10 +18,11 @@ export default function FriendSearch() {
     setLoading(true);
     try {
       const token = localStorage.getItem("access_token");
-      const res = await axios.get(`/api/search-users/?q=${query}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      if (!token) return;
+      const res = await axios.get(`${Url}/api/search-users/?q=${query}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       });
       console.log(res.data);
       setResults(Array.isArray(res.data) ? res.data : []);
