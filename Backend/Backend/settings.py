@@ -3,16 +3,19 @@ from datetime import timedelta
 import os
 import dj_database_url
 from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- Security Settings ---
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-dev')
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    '.netlify.app/',
-]
+
+ALLOWED_HOSTS = []
+
+# This will get the hostname Render assigns to your service
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # --- Application Definitions ---
 INSTALLED_APPS = [
