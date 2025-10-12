@@ -554,3 +554,139 @@
         opacity: 1;
     }
 }
+/* ==========================================================================
+   Responsive Styles
+   ========================================================================== */
+
+/* --- Tablet and smaller devices (max-width: 768px) --- */
+@media screen and (max-width: 768px) {
+  
+  /* Give the body a little less padding on the sides */
+  body {
+    padding: 1.5rem;
+  }
+
+  /* Make the turn indicator flexible instead of fixed-width */
+  .turn-indicator {
+    width: 90%;
+    max-width: 380px; /* Keep the original max size */
+  }
+
+  /* Adjust the hinge positions to be closer to the edges */
+  .hinge1 { left: 30px; }
+  .hinge2 { right: 30px; }
+
+  /* Make the chat box and notification banners fluid */
+  .chat-box,
+  .notification-banner {
+    width: 90vw;
+    max-width: 350px; /* Keep the original max size */
+  }
+
+  /* Center banners and popups that are fixed to an edge */
+  .chat-box {
+    right: 50%;
+    transform: translateX(50%) scale(0); /* Center it before animation */
+  }
+  .chat-box.visible {
+     transform: translateX(50%) scale(1);
+  }
+
+}
+
+
+/* --- Mobile devices (max-width: 550px) --- */
+@media screen and (max-width: 550px) {
+
+  body {
+    padding: 1rem; /* Further reduce body padding */
+    min-height: 100svh; /* Use small viewport height for mobile browsers */
+  }
+  
+  .container {
+      gap: 1.5rem; /* Reduce gap between header and board */
+  }
+
+  /* Reposition the 'Customizable' tag so it doesn't fly off-screen */
+  .customizable-tag {
+    top: -15px;
+    right: 0;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    transform: rotate(15deg);
+  }
+
+  /* Make the game board wrapper more compact */
+  .game-board-wrapper {
+    padding: 1rem;
+    padding-bottom: 30px; /* Reduce bottom padding */
+    width: 100%; /* Ensure it fits within the container padding */
+  }
+
+  /* The grid cells are already responsive with clamp(), which is great! */
+  .game-board {
+    gap: 10px; /* Slightly reduce the gap between cells */
+  }
+  
+  /* Hide decorative hinges on small screens to reduce clutter */
+  .hinge1, .hinge2 {
+    display: none;
+  }
+
+  /* Adjust turn indicator to be more compact */
+  .turn-indicator {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    bottom: 15px;
+  }
+  
+  /* --- MAJOR CHANGE: Transform Chat Box to a Bottom Sheet --- */
+  .chat-box {
+    width: 100%;
+    max-width: 100%;
+    height: 75vh; /* Take up most of the screen height */
+    max-height: 550px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-radius: 25px 25px 0 0; /* Rounded top corners */
+    border-width: 1px 1px 0 1px;
+    transform-origin: bottom center; /* Animate from the bottom */
+    transform: translateY(100%); /* Start off-screen at the bottom */
+    opacity: 1; /* Keep it opaque during transform */
+  }
+
+  .chat-box.visible {
+    transform: translateY(0); /* Slide into view */
+  }
+
+  /* Dynamically adjust message area height for the new bottom sheet */
+  .chat-messages {
+    height: calc(75vh - 125px); /* (Sheet Height - Header/Footer) */
+  }
+
+  
+  .friend-requests-toggle {
+    bottom: 1rem;
+    left: 1rem; /* Simple left position */
+  }
+
+  /* Adjust the chat toggle button position (now on the right) */
+  .chat-toggle-button {
+      bottom: 1rem;
+      right: 1rem; /* Changed from left */
+      left: auto;   /* Unset the left property */
+  }
+
+  /* Make the top notification banner more compact */
+  .notification-banner {
+    width: 95vw;
+    padding: 1rem 1.5rem;
+  }
+  .notification-content p {
+    font-size: 1rem;
+  }
+  .notification-actions button {
+    padding: 0.6rem 1.2rem;
+  }
+}

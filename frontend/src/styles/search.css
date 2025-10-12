@@ -128,3 +128,42 @@
     padding: 1rem;
     color: rgba(255, 255, 255, 0.7);
 }
+/* ==========================================================================
+   Responsive Styles for Friend Search
+   ========================================================================== */
+
+/* The component is already flexible. These rules target smaller mobile screens
+   to refine the layout and prevent it from feeling cramped. */
+
+@media screen and (max-width: 600px) {
+
+  /* Make the main container take up more screen width with less margin */
+  .friend-search-container {
+    margin: 1rem auto; /* Reduce vertical margin */
+    padding: 1rem;     /* Keep padding reasonable */
+    width: 95vw;       /* Ensure it doesn't touch the screen edges */
+  }
+
+  /* Make input and button text slightly smaller and adjust padding */
+  .search-input-field {
+    font-size: 0.9rem;
+    padding: 0.7rem;
+  }
+
+  .search-button,
+  .send-request-btn {
+    padding: 0.5rem 0.9rem; /* Adjust button padding for smaller size */
+    font-size: 0.9rem;
+  }
+  
+  /* Give the scrollable area a generous but fixed height suitable for mobile */
+  .search-results-list {
+    max-height: 250px; 
+  }
+
+  /* Make the individual result items a bit more compact */
+  .search-result-item {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+  }
+}

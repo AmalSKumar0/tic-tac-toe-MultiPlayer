@@ -264,3 +264,93 @@
     opacity: 1;
   }
 }
+
+
+/* --- Responsive Styles --- */
+
+/* --- Tablet and smaller devices (max-width: 768px) --- */
+@media screen and (max-width: 768px) {
+
+  /* Make pop-ups and notifications fluid instead of fixed-width */
+  .friend-requests-box,
+  .custom-alert-box,
+  .game-invite-notification {
+    width: 90vw; /* Use viewport width for flexibility */
+    max-width: 400px; /* Keep the max-width from the desktop design */
+  }
+
+  /* Adjust position of the social toggle button */
+  .friend-requests-toggle {
+    left: 1.5rem;
+    bottom: 1.5rem;
+    width: 55px;  /* Slightly smaller button */
+    height: 55px;
+    font-size: 1.8rem; /* Slightly smaller icon */
+  }
+
+  /* Center the invite notification correctly */
+  .game-invite-notification {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+
+/* --- Mobile devices (max-width: 600px) --- */
+@media screen and (max-width: 600px) {
+
+  /* Transform the social box into a bottom sheet for mobile */
+  .friend-requests-box {
+    width: 100%; /* Full width */
+    height: 75vh; /* Take up a good portion of the screen height */
+    max-height: 600px; /* But don't get too tall on long devices */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 25px 25px 0 0; /* Rounded top corners */
+    border-width: 1px 1px 0 1px; /* Remove bottom border */
+    transform-origin: bottom center; /* Animate from the bottom */
+  }
+
+  /* Adjust list height to fill the new container size */
+  .social-panel-body {
+    max-height: calc(75vh - 120px); /* Calculate available space dynamically */
+  }
+  
+  /* Make the header elements a bit more compact */
+  .friend-requests-header h3 {
+    font-size: 1.1rem;
+  }
+  .social-tab {
+    font-size: 0.9rem;
+    padding: 0.7rem;
+  }
+
+  /* Reposition the social toggle button for easier access */
+  .friend-requests-toggle {
+    left: 1rem;
+    bottom: 1rem;
+  }
+
+  /* Make the game invite notification more compact */
+  .game-invite-notification {
+    padding: 1rem 1.5rem;
+    width: 95vw;
+    max-width: 350px;
+  }
+  .invite-content p {
+    font-size: 1rem;
+  }
+  .invite-actions button {
+    padding: 0.6rem 1.2rem;
+  }
+
+  /* Make the custom alert box more compact */
+  .custom-alert-box {
+    padding: 1.5rem;
+    width: 90vw;
+  }
+  .custom-alert-box p {
+    font-size: 1.1rem;
+  }
+}

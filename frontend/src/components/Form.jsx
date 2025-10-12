@@ -33,7 +33,7 @@ function Form({ route, method }) {
         localStorage.setItem(USERNAME, username);
         navigate("/");
       } else {
-        navigate("/login"); // redirect after registration
+        navigate("/login"); 
       }
     } catch (err) {
       setError(err.response?.data?.detail || "Something went wrong");

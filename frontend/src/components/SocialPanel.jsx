@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../assets/home.css"; 
+import { Link } from "react-router-dom";
 const Url = import.meta.env.VITE_API_URL;
 
 const CustomAlert = ({ message, onClose }) => {
@@ -121,19 +122,15 @@ const handleResponse = async (id, action) => {
         
         {activeTab === 'friends' && (
             <div className="friends-list">
-              <a href="/friends" className="go-to-friends-link">Add Friends</a>
+              <Link to="/friends" className="go-to-friends-link">Add Friends</Link>
               {friends && friends.length > 0 ? (
                 friends.map((friend) => (
                   <div key={friend.id} className="friend-item">
                     <div className="friend-info">
-                      {/* ✅ MODIFIED LINE: Use the helper function */}
                       <span className={getStatusClass(friend.status)}></span>
                       {friend.username}
-                      {/* Optional: Add text to show the status */}
                       {friend.status === 'in-game' && <span className="status-text"> (In Game)</span>}
                     </div>
-                    
-                    {/* ✅ CORRECT LOGIC: Show play button only if friend is online, not in-game */}
                     {friend.status === "online" && (
                       <button onClick={() => sendGameRequest(friend.id)} className="play-btn">Play</button>
                     )}
