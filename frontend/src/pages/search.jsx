@@ -37,15 +37,17 @@ export default function FriendSearch() {
   const sendRequest = async (id) => {
     try {
       const token = localStorage.getItem("access_token");
-      await axios.post(
-        `/api/send-friend-request/${id}/`,
-        {}, // empty body
+      if (!token) return;
+      const res = await axios.post(
+        `${Url}/api/send-friend-request/${id}/`,
+        {},
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
           },
         }
       );
+      console.log(res.data);
       // Update results to show the user that the request was sent
       setResults((prev) =>
         prev.map((user) =>
