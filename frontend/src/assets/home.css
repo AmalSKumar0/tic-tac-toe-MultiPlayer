@@ -269,22 +269,14 @@
   .friend-requests-box,
   .custom-alert-box,
   .game-invite-notification {
-    width: 90vw; /* Use viewport width for flexibility */
-    max-width: 400px; /* Keep the max-width from the desktop design */
-  }
-
-  /* Adjust position of the social toggle button */
-  .friend-requests-toggle {
-    left: 1rem;
-    bottom: 1rem;
+    width: 90vw; 
+    max-width: 400px;
   }
 
   .hinge1, .hinge2 {
     display: none;
   }
 
-
-  /* Center the invite notification correctly */
   .game-invite-notification {
     left: 50%;
     transform: translateX(-50%);
