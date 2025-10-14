@@ -265,13 +265,7 @@
   }
 }
 
-
-/* --- Responsive Styles --- */
-
-/* --- Tablet and smaller devices (max-width: 768px) --- */
 @media screen and (max-width: 768px) {
-
-  /* Make pop-ups and notifications fluid instead of fixed-width */
   .friend-requests-box,
   .custom-alert-box,
   .game-invite-notification {
@@ -281,12 +275,14 @@
 
   /* Adjust position of the social toggle button */
   .friend-requests-toggle {
-    left: 1.5rem;
-    bottom: 1.5rem;
-    width: 55px;  /* Slightly smaller button */
-    height: 55px;
-    font-size: 1.8rem; /* Slightly smaller icon */
+    left: 1rem;
+    bottom: 1rem;
   }
+
+  .hinge1, .hinge2 {
+    display: none;
+  }
+
 
   /* Center the invite notification correctly */
   .game-invite-notification {
@@ -353,4 +349,8 @@
   .custom-alert-box p {
     font-size: 1.1rem;
   }
+  .hinge1, .hinge2 {
+    display: none;
+  }
+
 }

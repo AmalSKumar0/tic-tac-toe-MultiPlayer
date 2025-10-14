@@ -217,18 +217,21 @@
         /* ------------------- */
         /* Floating Icons (UPDATED) */
         /* ------------------- */
-        .floating-icons-container {
-            position: fixed; /* Use fixed to cover the whole viewport */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Place it behind the main container */
-            pointer-events: none; /* Make it non-interactive */
-        }
-        /* styles.css */
+.floating-icons-container {
+    position: fixed; /* Use fixed to cover the whole viewport */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Place it behind the main container */
+    pointer-events: none; /* Make it non-interactive */
+}
 
-/* Keep the overlay styles ONLY for the confetti */
+/* ------------------- */
+/* Overlay & Animation Classes */
+/* ------------------- */
+
+/* Confetti overlay */
 .confetti {
   position: fixed;
   top: 0;
@@ -236,26 +239,19 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 9999; /* Good to have a z-index for overlays */
+  z-index: 2000; 
 }
+
 .background-flash {
-  /* Make it a full-screen overlay */
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  
-  /* Put it BEHIND your game content */
   z-index: -1; 
-  
-  /* Make it invisible by default */
   background-color: transparent;
-  
-  /* Prevent it from capturing mouse clicks */
   pointer-events: none; 
 }
-
 /* Apply the animation when the .lose or .draw class is added */
 .background-flash.lose {
   animation: flash-red 2s ease-in-out;
