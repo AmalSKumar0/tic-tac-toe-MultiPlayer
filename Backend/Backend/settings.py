@@ -71,7 +71,7 @@ ASGI_APPLICATION = "Backend.asgi.application"
 # while still using the environment variable for production.
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgresql://neondb_owner:npg_uI7oUbjMadN8@ep-fragrant-rain-aeez2ai5-pooler.c-2.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require'),
+        default=os.environ.get('DATABASE_URL', ),
         conn_max_age=600,
         ssl_require=False # SSL is not needed for local Docker communication
     )
